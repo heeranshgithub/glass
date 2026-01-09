@@ -1,0 +1,612 @@
+/* Import Google Fonts - must be before all other rules */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Futuristic accent colors */
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-purple: var(--neon-purple);
+  --color-neon-pink: var(--neon-pink);
+  --color-neon-green: var(--neon-green);
+  --color-neon-orange: var(--neon-orange);
+}
+
+:root {
+  --background: oklch(0.98 0.005 260);
+  --foreground: oklch(0.15 0.02 260);
+  --card: oklch(0.99 0.003 260);
+  --card-foreground: oklch(0.15 0.02 260);
+  --popover: oklch(0.99 0.003 260);
+  --popover-foreground: oklch(0.15 0.02 260);
+  --primary: oklch(0.55 0.2 260);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.94 0.01 260);
+  --secondary-foreground: oklch(0.25 0.02 260);
+  --muted: oklch(0.95 0.008 260);
+  --muted-foreground: oklch(0.45 0.02 260);
+  --accent: oklch(0.92 0.02 260);
+  --accent-foreground: oklch(0.15 0.02 260);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.88 0.015 260);
+  --input: oklch(0.92 0.01 260);
+  --ring: oklch(0.55 0.2 260);
+
+  /* Futuristic neon colors - light mode */
+  --neon-cyan: oklch(0.75 0.15 195);
+  --neon-purple: oklch(0.6 0.2 290);
+  --neon-pink: oklch(0.65 0.22 350);
+  --neon-green: oklch(0.72 0.18 145);
+  --neon-orange: oklch(0.72 0.18 55);
+
+  /* Chart colors with more vibrancy */
+  --chart-1: oklch(0.65 0.18 195);
+  --chart-2: oklch(0.6 0.2 290);
+  --chart-3: oklch(0.68 0.2 145);
+  --chart-4: oklch(0.7 0.18 55);
+  --chart-5: oklch(0.65 0.22 350);
+
+  --radius: 0.75rem;
+
+  /* Sidebar - light glass effect */
+  --sidebar: oklch(0.97 0.008 260 / 80%);
+  --sidebar-foreground: oklch(0.15 0.02 260);
+  --sidebar-primary: oklch(0.55 0.2 260);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.92 0.02 260);
+  --sidebar-accent-foreground: oklch(0.15 0.02 260);
+  --sidebar-border: oklch(0.85 0.02 260 / 50%);
+  --sidebar-ring: oklch(0.55 0.2 260);
+}
+
+.dark {
+  --background: oklch(0.08 0.02 260);
+  --foreground: oklch(0.95 0.01 260);
+  --card: oklch(0.12 0.025 260);
+  --card-foreground: oklch(0.95 0.01 260);
+  --popover: oklch(0.12 0.025 260);
+  --popover-foreground: oklch(0.95 0.01 260);
+  --primary: oklch(0.75 0.15 195);
+  --primary-foreground: oklch(0.08 0.02 260);
+  --secondary: oklch(0.18 0.025 260);
+  --secondary-foreground: oklch(0.95 0.01 260);
+  --muted: oklch(0.15 0.02 260);
+  --muted-foreground: oklch(0.65 0.02 260);
+  --accent: oklch(0.2 0.03 260);
+  --accent-foreground: oklch(0.95 0.01 260);
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(0.25 0.03 260 / 60%);
+  --input: oklch(0.18 0.025 260);
+  --ring: oklch(0.75 0.15 195);
+
+  /* Futuristic neon colors - dark mode (more vibrant) */
+  --neon-cyan: oklch(0.8 0.18 195);
+  --neon-purple: oklch(0.7 0.22 290);
+  --neon-pink: oklch(0.72 0.24 350);
+  --neon-green: oklch(0.78 0.2 145);
+  --neon-orange: oklch(0.78 0.2 55);
+
+  /* Chart colors - dark mode */
+  --chart-1: oklch(0.75 0.18 195);
+  --chart-2: oklch(0.7 0.22 290);
+  --chart-3: oklch(0.75 0.2 145);
+  --chart-4: oklch(0.78 0.2 55);
+  --chart-5: oklch(0.72 0.24 350);
+
+  /* Sidebar - dark glass effect */
+  --sidebar: oklch(0.1 0.025 260 / 85%);
+  --sidebar-foreground: oklch(0.95 0.01 260);
+  --sidebar-primary: oklch(0.75 0.15 195);
+  --sidebar-primary-foreground: oklch(0.08 0.02 260);
+  --sidebar-accent: oklch(0.2 0.03 260 / 70%);
+  --sidebar-accent-foreground: oklch(0.95 0.01 260);
+  --sidebar-border: oklch(0.35 0.04 260 / 40%);
+  --sidebar-ring: oklch(0.75 0.15 195);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+}
+
+/* ========================================
+   GLASSMORPHISM UTILITIES
+   ======================================== */
+
+.glass {
+  background: oklch(0.98 0.005 260 / 60%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid oklch(0.85 0.02 260 / 30%);
+}
+
+.dark .glass {
+  background: oklch(0.12 0.025 260 / 70%);
+  border: 1px solid oklch(0.4 0.04 260 / 20%);
+}
+
+.glass-subtle {
+  background: oklch(0.97 0.005 260 / 40%);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+.dark .glass-subtle {
+  background: oklch(0.1 0.02 260 / 50%);
+}
+
+/* ========================================
+   GLOW EFFECTS
+   ======================================== */
+
+.glow-cyan {
+  box-shadow:
+    0 0 20px oklch(0.75 0.15 195 / 30%),
+    0 0 40px oklch(0.75 0.15 195 / 15%),
+    inset 0 0 20px oklch(0.75 0.15 195 / 5%);
+}
+
+.glow-purple {
+  box-shadow:
+    0 0 20px oklch(0.7 0.22 290 / 30%),
+    0 0 40px oklch(0.7 0.22 290 / 15%),
+    inset 0 0 20px oklch(0.7 0.22 290 / 5%);
+}
+
+.glow-green {
+  box-shadow:
+    0 0 20px oklch(0.75 0.2 145 / 30%),
+    0 0 40px oklch(0.75 0.2 145 / 15%),
+    inset 0 0 20px oklch(0.75 0.2 145 / 5%);
+}
+
+.glow-pink {
+  box-shadow:
+    0 0 20px oklch(0.72 0.24 350 / 30%),
+    0 0 40px oklch(0.72 0.24 350 / 15%),
+    inset 0 0 20px oklch(0.72 0.24 350 / 5%);
+}
+
+.glow-orange {
+  box-shadow:
+    0 0 20px oklch(0.78 0.2 55 / 30%),
+    0 0 40px oklch(0.78 0.2 55 / 15%),
+    inset 0 0 20px oklch(0.78 0.2 55 / 5%);
+}
+
+.text-glow-cyan {
+  text-shadow:
+    0 0 10px oklch(0.75 0.15 195 / 50%),
+    0 0 20px oklch(0.75 0.15 195 / 30%);
+}
+
+.border-glow-cyan {
+  border-color: oklch(0.75 0.15 195 / 60%);
+  box-shadow:
+    0 0 15px oklch(0.75 0.15 195 / 25%),
+    inset 0 0 15px oklch(0.75 0.15 195 / 5%);
+}
+
+/* ========================================
+   ANIMATED BACKGROUNDS
+   ======================================== */
+
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(oklch(0.5 0.1 260 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.5 0.1 260 / 5%) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.dark .bg-grid-pattern {
+  background-image:
+    linear-gradient(oklch(0.6 0.15 195 / 8%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.6 0.15 195 / 8%) 1px, transparent 1px);
+}
+
+.bg-gradient-radial {
+  background:
+    radial-gradient(
+      ellipse at top,
+      oklch(0.55 0.15 260 / 10%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      oklch(0.75 0.15 195 / 8%) 0%,
+      transparent 40%
+    );
+}
+
+.dark .bg-gradient-radial {
+  background:
+    radial-gradient(
+      ellipse at top,
+      oklch(0.7 0.22 290 / 15%) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      oklch(0.75 0.18 195 / 12%) 0%,
+      transparent 40%
+    );
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.85;
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.75 0.15 195 / 20%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-border-flow {
+  background: linear-gradient(
+    90deg,
+    oklch(0.75 0.15 195) 0%,
+    oklch(0.7 0.22 290) 25%,
+    oklch(0.72 0.24 350) 50%,
+    oklch(0.75 0.15 195) 75%,
+    oklch(0.7 0.22 290) 100%
+  );
+  background-size: 300% 100%;
+  animation: border-flow 4s linear infinite;
+}
+
+/* ========================================
+   PROSE STYLING
+   ======================================== */
+
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--muted-foreground);
+  --tw-prose-links: var(--primary);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-bullets: var(--muted-foreground);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-captions: var(--muted-foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-code: var(--foreground);
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
+
+.prose pre {
+  @apply bg-muted/50 rounded-xl p-4 overflow-x-auto border border-border/50;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prose code {
+  @apply bg-muted/70 px-2 py-1 rounded-md text-sm font-mono text-primary;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prose pre code {
+  @apply bg-transparent p-0 text-foreground;
+}
+
+.prose a {
+  @apply text-primary hover:underline decoration-primary/50 underline-offset-2;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  @apply font-semibold tracking-tight;
+}
+
+.prose ul,
+.prose ol {
+  @apply my-3;
+  list-style-position: outside;
+  padding-left: 1.75rem;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  @apply my-1.5;
+  padding-left: 0.5rem;
+  line-height: 1.75;
+  position: relative;
+}
+
+/* Style list markers with primary color */
+.prose ul li::marker,
+.prose ol li::marker {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Nested lists - proper indentation */
+.prose ul ul,
+.prose ol ol,
+.prose ul ol,
+.prose ol ul {
+  @apply my-2;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.prose ul ul {
+  list-style-type: circle;
+}
+
+.prose ul ul ul {
+  list-style-type: square;
+}
+
+.prose ol ol {
+  list-style-type: lower-alpha;
+}
+
+.prose ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* Better spacing for list items with nested content */
+.prose li > p {
+  @apply my-1;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose li > p:first-child {
+  margin-top: 0;
+}
+
+.prose li > p:last-child {
+  margin-bottom: 0;
+}
+
+/* Ensure nested lists have proper spacing */
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary/40 pl-4 italic text-muted-foreground;
+}
+
+/* ========================================
+   CUSTOM SCROLLBAR
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.6 0.02 260 / 40%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.02 260 / 60%);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0.1 195 / 40%);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0.12 195 / 60%);
+}
+
+/* ========================================
+   SPECIAL COMPONENTS
+   ======================================== */
+
+/* Hexagon logo animation */
+.hexagon-logo {
+  filter: drop-shadow(0 0 8px oklch(0.75 0.15 195 / 50%));
+  transition: all 0.3s ease;
+}
+
+.hexagon-logo:hover {
+  filter: drop-shadow(0 0 12px oklch(0.75 0.15 195 / 70%));
+  transform: scale(1.05);
+}
+
+/* Conversation item hover effect */
+.conversation-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.conversation-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    oklch(0.75 0.15 195),
+    oklch(0.7 0.22 290)
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.conversation-item:hover::before,
+.conversation-item.active::before {
+  opacity: 1;
+}
+
+/* Input focus glow */
+.input-glow:focus-within {
+  box-shadow:
+    0 0 0 2px oklch(0.75 0.15 195 / 20%),
+    0 0 20px oklch(0.75 0.15 195 / 15%);
+}
+
+/* Stage card styles */
+.stage-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stage-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--stage-gradient);
+  opacity: 0.8;
+}
+
+.stage-1 {
+  --stage-gradient: linear-gradient(
+    90deg,
+    oklch(0.75 0.18 195),
+    oklch(0.65 0.15 195 / 30%)
+  );
+}
+
+.stage-2 {
+  --stage-gradient: linear-gradient(
+    90deg,
+    oklch(0.7 0.22 290),
+    oklch(0.6 0.18 290 / 30%)
+  );
+}
+
+.stage-3 {
+  --stage-gradient: linear-gradient(
+    90deg,
+    oklch(0.75 0.2 145),
+    oklch(0.65 0.16 145 / 30%)
+  );
+}

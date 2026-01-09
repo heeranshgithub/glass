@@ -1,0 +1,24 @@
+### Naming conventions (FastAPI + MongoDB + Frontend)
+
+#### Backend (FastAPI + MongoDB): **snake_case only**
+
+- **Python code**: use `snake_case` for variables, functions, JSON keys, request/response schema fields, and MongoDB document fields.
+- **MongoDB documents**: store fields in `snake_case` (e.g., `created_at`, `last_login`, `user_name`, `email_address`).
+- **FastAPI request models**:
+  - Default expectation is `snake_case` field names in code.
+  - If an endpoint is consumed by the frontend, prefer using the shared camel-case adapter (`backend/schemas/base.py`) rather than hand-mapping in clients.
+
+#### Frontend (`frontend/`): **camelCase only**
+
+- **TypeScript/React code**: use `camelCase` for variables, props, API request bodies, and UI state.
+- **Frontend API payloads**: send `camelCase` keys by default (e.g., `{ userName: "..." }`, `{ emailAddress: "..." }`, `{ createdAt: "..." }`).
+
+#### Bridge rule: backend accepts camelCase via `CamelSchema`, stores snake_case
+
+- When the backend needs to accept frontend-style `camelCase`, request schemas must inherit:
+  - `CamelSchema` from `backend/schemas/base.py`
+  - and/or use `camel_config(...)`
+- This enables Pydantic aliasing:
+  - **Input**: accepts both `camelCase` and `snake_case` (e.g., `userName` or `user_name` both work)
+  - **Output**: serializes responses as `camelCase` (e.g., `{ userName: "...", createdAt: "..." }`)
+- **Do NOT** add manual field name transforms in frontend code (e.g., `{ userName: data.userName }` → `{ user_name: data.userName }`) unless there is no `CamelSchema` involved.
