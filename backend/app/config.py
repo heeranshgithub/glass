@@ -54,7 +54,17 @@ DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 # Email/SMTP Configuration
 WAITLIST_EMAIL = os.getenv("WAITLIST_EMAIL", "")
 WAITLIST_PASS = os.getenv("WAITLIST_PASS", "")
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_HOST = os.getenv("SMTP_HOST", "smtpout.secureserver.net")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+
+# SMTP transport security mode:
+# - ssl: implicit TLS (typical for port 465)
+# - starttls: STARTTLS upgrade (typical for port 587)
+# - none: plaintext (not recommended; mainly for local debugging)
+_smtp_security_env = os.getenv("SMTP_SECURITY")
+if _smtp_security_env:
+    SMTP_SECURITY = _smtp_security_env.strip().lower()
+else:
+    SMTP_SECURITY = "ssl" if SMTP_PORT == 465 else "starttls"
 
 

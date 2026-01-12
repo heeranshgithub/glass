@@ -1,6 +1,7 @@
 """Email service for sending emails via SMTP."""
 
 import smtplib
+import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
@@ -11,6 +12,7 @@ from app.config import (
     WAITLIST_PASS,
     SMTP_HOST,
     SMTP_PORT,
+    SMTP_SECURITY,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,6 +41,42 @@ class EmailService:
         self.smtp_port = smtp_port
         self.smtp_email = smtp_email
         self.smtp_password = smtp_password
+        self.smtp_security = SMTP_SECURITY
+        self.smtp_timeout_seconds = 15
+
+    def _send_message(self, msg: MIMEMultipart) -> None:
+        """
+        Send a prebuilt MIME message using configured SMTP transport.
+
+        Notes:
+        - Port 465 typically requires implicit TLS (SMTP_SSL) and must NOT call starttls().
+        - Port 587 typically uses STARTTLS (SMTP + starttls()).
+        """
+        security = (self.smtp_security or "").strip().lower()
+        context = ssl.create_default_context()
+
+        if security == "ssl":
+            with smtplib.SMTP_SSL(
+                self.smtp_host,
+                self.smtp_port,
+                timeout=self.smtp_timeout_seconds,
+                context=context,
+            ) as server:
+                server.login(self.smtp_email, self.smtp_password)
+                server.send_message(msg)
+            return
+
+        with smtplib.SMTP(
+            self.smtp_host,
+            self.smtp_port,
+            timeout=self.smtp_timeout_seconds,
+        ) as server:
+            server.ehlo()
+            if security == "starttls":
+                server.starttls(context=context)
+                server.ehlo()
+            server.login(self.smtp_email, self.smtp_password)
+            server.send_message(msg)
     
     def _create_waitlist_confirmation_html(self, email: str) -> str:
         """
@@ -166,7 +204,7 @@ class EmailService:
             # Create message
             msg = MIMEMultipart('alternative')
             msg['Subject'] = "You're on the Glass Waitlist! 🎉"
-            msg['From'] = self.smtp_email
+            msg['From'] = f"Glass <{self.smtp_email}>"
             msg['To'] = to_email
             
             # Create HTML part
@@ -175,10 +213,7 @@ class EmailService:
             msg.attach(html_part)
             
             # Send email
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                server.starttls()
-                server.login(self.smtp_email, self.smtp_password)
-                server.send_message(msg)
+            self._send_message(msg)
             
             logger.info(f"Waitlist confirmation email sent to {to_email}")
             return True
@@ -209,7 +244,7 @@ class EmailService:
         try:
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
-            msg['From'] = self.smtp_email
+            msg['From'] = f"Glass <{self.smtp_email}>"
             msg['To'] = to_email
             
             if text_content:
@@ -219,10 +254,7 @@ class EmailService:
             html_part = MIMEText(html_content, 'html')
             msg.attach(html_part)
             
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                server.starttls()
-                server.login(self.smtp_email, self.smtp_password)
-                server.send_message(msg)
+            self._send_message(msg)
             
             logger.info(f"Email sent to {to_email}: {subject}")
             return True
