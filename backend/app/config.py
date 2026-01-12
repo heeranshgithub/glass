@@ -51,4 +51,10 @@ API_V1_PREFIX = ""  # No versioning prefix for now
 APP_NAME = "Glass Backend - LLM Council API"
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
+# Email/SMTP Configuration
+WAITLIST_EMAIL = os.getenv("WAITLIST_EMAIL", "")
+WAITLIST_PASS = os.getenv("WAITLIST_PASS", "")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+
 

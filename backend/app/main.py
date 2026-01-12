@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import APP_NAME, CORS_ORIGINS, API_V1_PREFIX, DEBUG
 from core.database import connect_to_mongodb, close_mongodb_connection
-from api import auth, conversations, users, leaderboard
+from api import auth, conversations, users, leaderboard, waitlist
 
 
 @asynccontextmanager
@@ -75,6 +75,12 @@ app.include_router(
     leaderboard.router,
     prefix=f"{API_V1_PREFIX}",
     tags=["Leaderboard"]
+)
+
+app.include_router(
+    waitlist.router,
+    prefix=f"{API_V1_PREFIX}/waitlist",
+    tags=["Waitlist"]
 )
 
 

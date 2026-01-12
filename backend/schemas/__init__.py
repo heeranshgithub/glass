@@ -31,6 +31,7 @@ from schemas.user import (
     UserListResponse,
     UserListQuery,
 )
+from schemas.waitlist import WaitlistJoinRequest, WaitlistJoinResponse
 
 __all__ = [
     # Base
@@ -64,4 +65,7 @@ __all__ = [
     "AdminUserUpdateRequest",
     "UserListResponse",
     "UserListQuery",
+    # Waitlist
+    "WaitlistJoinRequest",
+    "WaitlistJoinResponse",
 ]
