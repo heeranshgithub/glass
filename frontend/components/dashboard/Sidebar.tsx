@@ -270,7 +270,7 @@ export function Sidebar() {
                     !sidebarOpen && 'lg:justify-center lg:px-0'
                   )}
                 >
-                  <div
+                  {/* <div
                     className={cn(
                       'flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-colors',
                       currentConversationId === conv.id
@@ -284,18 +284,18 @@ export function Sidebar() {
                         currentConversationId === conv.id && 'text-primary'
                       )}
                     />
-                  </div>
+                  </div> */}
                   {sidebarOpen && (
                     <>
                       <div className="flex-1 min-w-0">
                         <div className="truncate text-sm font-medium">
                           {conv.title || 'New Conversation'}
                         </div>
-                        <div className="text-xs text-muted-foreground/70">
+                        {/* <div className="text-xs text-muted-foreground/70">
                           {formatDistanceToNow(new Date(conv.createdAt), {
                             addSuffix: true,
                           })}
-                        </div>
+                        </div> */}
                       </div>
                       {/* <Button
                         variant="ghost"
