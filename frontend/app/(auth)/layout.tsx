@@ -85,7 +85,7 @@ export default function AuthLayout({
           </div>
 
           <div className="text-sm text-primary-foreground/50">
-            © 2025 Glass. Production-ready LLM infrastructure.
+            © 2026 Glass. Production-ready LLM infrastructure.
           </div>
         </div>
       </div>
