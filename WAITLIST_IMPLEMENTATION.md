@@ -261,7 +261,7 @@ db.waitlist.findOne({ email: "test@example.com" })
 
 ## Copy & Messaging
 
-**Headline**: "Questions that matters"
+**Headline**: "Questions that matter"
 
 **Subheading**: "Glass is live and helping users get balanced, well-reasoned answers through our innovative multi-model council. As we scale our infrastructure to serve more users, join the waitlist for priority access."
 

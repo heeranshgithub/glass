@@ -177,7 +177,7 @@ class EmailService:
                             </p>
                             <p style="margin: 0; color: #86868b; font-size: 12px; line-height: 1.5;">
                                 © 2026 Glass. Production-ready LLM infrastructure.<br>
-                                Questions that matters.
+                                Questions that matter.
                             </p>
                         </td>
                     </tr>

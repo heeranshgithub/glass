@@ -37,7 +37,7 @@ export function WaitlistMobile(props: Props) {
 
           <div className="space-y-3">
             <h1 className="text-4xl font-bold leading-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
-              Questions that matters
+              Questions that matter
             </h1>
             <p className="text-base text-muted-foreground leading-relaxed">
               Glass is live. We&apos;re scaling infrastructure to bring more
