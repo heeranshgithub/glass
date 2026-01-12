@@ -62,6 +62,12 @@ export interface AssistantMessage {
     stage2: boolean;
     stage3: boolean;
   };
+  // Streaming state - accumulates tokens as they arrive
+  streaming?: {
+    stage1Models?: Record<string, string>; // modelId -> accumulated text
+    stage2Models?: Record<string, string>; // modelId -> accumulated text
+    stage3Text?: string; // accumulated final response
+  };
 }
 
 export type Message = UserMessage | AssistantMessage;
@@ -94,10 +100,13 @@ export interface CouncilHealthResponse {
 // Streaming Event Types
 export type StreamEventType =
   | 'stage1Start'
+  | 'stage1Token'
   | 'stage1Complete'
   | 'stage2Start'
+  | 'stage2Token'
   | 'stage2Complete'
   | 'stage3Start'
+  | 'stage3Token'
   | 'stage3Complete'
   | 'titleComplete'
   | 'complete'
@@ -106,6 +115,8 @@ export type StreamEventType =
 export interface StreamEvent {
   type: StreamEventType;
   data?: unknown;
+  model?: string; // For identifying which model in parallel streams (stage1Token, stage2Token)
+  token?: string; // For token content (stage1Token, stage2Token, stage3Token)
   metadata?: CouncilMetadata;
   message?: string;
 }

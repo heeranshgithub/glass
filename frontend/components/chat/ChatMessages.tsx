@@ -179,12 +179,22 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
             stage={1}
           />
         )}
+        {/* Show streaming Stage 1 */}
+        {message.streaming?.stage1Models &&
+          Object.keys(message.streaming.stage1Models).length > 0 && (
+            <StreamingStage1Display models={message.streaming.stage1Models} />
+          )}
         {message.stage1 && <Stage1Display responses={message.stage1} />}
 
         {/* Stage 2 */}
         {message.loading?.stage2 && (
           <LoadingStage label="Stage 2: Running peer rankings..." stage={2} />
         )}
+        {/* Show streaming Stage 2 */}
+        {message.streaming?.stage2Models &&
+          Object.keys(message.streaming.stage2Models).length > 0 && (
+            <StreamingStage2Display models={message.streaming.stage2Models} />
+          )}
         {message.stage2 && (
           <Stage2Display
             rankings={message.stage2}
@@ -199,6 +209,10 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
             label="Stage 3: Synthesizing final answer..."
             stage={3}
           />
+        )}
+        {/* Show streaming Stage 3 */}
+        {message.streaming?.stage3Text && (
+          <StreamingStage3Display text={message.streaming.stage3Text} />
         )}
         {message.stage3 && <Stage3Display response={message.stage3} />}
 
@@ -252,6 +266,96 @@ function LoadingStage({ label, stage }: { label: string; stage: number }) {
       <span className="text-sm font-medium">{label}</span>
       <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
         <div className="h-full w-1/3 rounded-full animate-shimmer bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      </div>
+    </div>
+  );
+}
+
+function StreamingStage1Display({
+  models,
+}: {
+  models: Record<string, string>;
+}) {
+  const getModelShortName = (model: string) => {
+    const parts = model.split('/');
+    return parts[parts.length - 1] || model;
+  };
+
+  return (
+    <div className="glass rounded-xl border border-chart-1/30 overflow-hidden bg-gradient-to-br from-chart-1/5 to-transparent">
+      <div className="px-4 py-3 border-b border-chart-1/20 bg-chart-1/5 flex items-center gap-3">
+        <Brain className="h-4 w-4 text-chart-1" />
+        <span className="text-sm font-medium">Stage 1: Models Responding...</span>
+      </div>
+      <div className="p-4 space-y-4">
+        {Object.entries(models).map(([model, text]) => (
+          <div key={model} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <code className="text-xs text-muted-foreground font-mono">
+                {getModelShortName(model)}
+              </code>
+              <Loader2 className="h-3 w-3 animate-spin text-chart-1" />
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown>{text}</ReactMarkdown>
+              <span className="inline-block w-2 h-4 bg-chart-1 animate-pulse ml-1" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StreamingStage2Display({
+  models,
+}: {
+  models: Record<string, string>;
+}) {
+  const getModelShortName = (model: string) => {
+    const parts = model.split('/');
+    return parts[parts.length - 1] || model;
+  };
+
+  return (
+    <div className="glass rounded-xl border border-chart-2/30 overflow-hidden bg-gradient-to-br from-chart-2/5 to-transparent">
+      <div className="px-4 py-3 border-b border-chart-2/20 bg-chart-2/5 flex items-center gap-3">
+        <Brain className="h-4 w-4 text-chart-2" />
+        <span className="text-sm font-medium">Stage 2: Models Ranking...</span>
+      </div>
+      <div className="p-4 space-y-4">
+        {Object.entries(models).map(([model, text]) => (
+          <div key={model} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <code className="text-xs text-muted-foreground font-mono">
+                {getModelShortName(model)}
+              </code>
+              <Loader2 className="h-3 w-3 animate-spin text-chart-2" />
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+              <ReactMarkdown>{text}</ReactMarkdown>
+              <span className="inline-block w-2 h-4 bg-chart-2 animate-pulse ml-1" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StreamingStage3Display({ text }: { text: string }) {
+  return (
+    <div className="glass rounded-xl border border-chart-3/30 overflow-hidden bg-gradient-to-br from-chart-3/5 to-transparent">
+      <div className="px-4 py-3 border-b border-chart-3/20 bg-chart-3/5 flex items-center gap-3">
+        <Sparkles className="h-4 w-4 text-chart-3" />
+        <span className="text-sm font-medium">Stage 3: Final Answer...</span>
+        <Loader2 className="h-3 w-3 animate-spin text-chart-3 ml-auto" />
+      </div>
+      <div className="p-5">
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <ReactMarkdown>{text}</ReactMarkdown>
+          <span className="inline-block w-2 h-4 bg-chart-3 animate-pulse ml-1" />
+        </div>
       </div>
     </div>
   );

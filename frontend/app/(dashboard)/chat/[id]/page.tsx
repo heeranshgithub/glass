@@ -211,26 +211,94 @@ export default function ChatPage() {
       switch (event.type) {
         case 'stage1Start':
           lastMsg.loading = { ...lastMsg.loading!, stage1: true };
+          // Initialize streaming state
+          if (!lastMsg.streaming) {
+            lastMsg.streaming = {};
+          }
+          lastMsg.streaming.stage1Models = {};
           break;
+
+        case 'stage1Token':
+          // Accumulate tokens for each model
+          if (!lastMsg.streaming) {
+            lastMsg.streaming = {};
+          }
+          if (!lastMsg.streaming.stage1Models) {
+            lastMsg.streaming.stage1Models = {};
+          }
+          const modelId1 = event.model!;
+          lastMsg.streaming.stage1Models[modelId1] =
+            (lastMsg.streaming.stage1Models[modelId1] || '') + event.token;
+          break;
+
         case 'stage1Complete':
           lastMsg.stage1 = event.data as AssistantMessage['stage1'];
           lastMsg.loading = { ...lastMsg.loading!, stage1: false };
+          // Clear streaming state for stage 1
+          if (lastMsg.streaming) {
+            lastMsg.streaming.stage1Models = undefined;
+          }
           break;
+
         case 'stage2Start':
           lastMsg.loading = { ...lastMsg.loading!, stage2: true };
+          // Initialize streaming state
+          if (!lastMsg.streaming) {
+            lastMsg.streaming = {};
+          }
+          lastMsg.streaming.stage2Models = {};
           break;
+
+        case 'stage2Token':
+          // Accumulate tokens for each model
+          if (!lastMsg.streaming) {
+            lastMsg.streaming = {};
+          }
+          if (!lastMsg.streaming.stage2Models) {
+            lastMsg.streaming.stage2Models = {};
+          }
+          const modelId2 = event.model!;
+          lastMsg.streaming.stage2Models[modelId2] =
+            (lastMsg.streaming.stage2Models[modelId2] || '') + event.token;
+          break;
+
         case 'stage2Complete':
           lastMsg.stage2 = event.data as AssistantMessage['stage2'];
           lastMsg.metadata = event.metadata as CouncilMetadata;
           lastMsg.loading = { ...lastMsg.loading!, stage2: false };
+          // Clear streaming state for stage 2
+          if (lastMsg.streaming) {
+            lastMsg.streaming.stage2Models = undefined;
+          }
           break;
+
         case 'stage3Start':
           lastMsg.loading = { ...lastMsg.loading!, stage3: true };
+          // Initialize streaming state
+          if (!lastMsg.streaming) {
+            lastMsg.streaming = {};
+          }
+          lastMsg.streaming.stage3Text = '';
           break;
+
+        case 'stage3Token':
+          // Accumulate tokens for final response
+          if (!lastMsg.streaming) {
+            lastMsg.streaming = {};
+          }
+          lastMsg.streaming.stage3Text =
+            (lastMsg.streaming.stage3Text || '') + event.token;
+          break;
+
         case 'stage3Complete':
           lastMsg.stage3 = event.data as AssistantMessage['stage3'];
           lastMsg.loading = { ...lastMsg.loading!, stage3: false };
+          // Clear streaming state for stage 3
+          if (lastMsg.streaming) {
+            lastMsg.streaming.stage3Text = undefined;
+          }
           break;
+
         case 'error':
           console.error('Stream error:', event.message);
           break;

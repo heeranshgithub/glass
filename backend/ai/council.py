@@ -2,9 +2,9 @@
 
 import re
 from collections import defaultdict
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple, Optional, AsyncGenerator
 
-from ai.openrouter import query_models_parallel, query_model
+from ai.openrouter import query_models_parallel, query_model, query_models_parallel_stream, query_model_stream
 from ai.config import COUNCIL_MODELS, ARBITER_MODEL, TITLE_MODEL
 from schemas.conversation import (
     ModelResponseSchema,
@@ -385,3 +385,243 @@ Title:"""
         title = title[:47] + "..."
 
     return title
+
+
+# ============================================================================
+# STREAMING VERSIONS OF STAGE FUNCTIONS
+# ============================================================================
+
+async def stage1_collect_responses_stream(
+    user_query: str, 
+    api_key: str
+) -> AsyncGenerator[Tuple[str, Dict[str, Any]], None]:
+    """
+    Stage 1: Collect individual responses from all council models with streaming.
+
+    Args:
+        user_query: The user's question
+        api_key: OpenRouter API key
+
+    Yields:
+        Tuple of ("token", {"model": str, "token": str}) for each token
+        Tuple of ("complete", List[ModelResponseSchema]) when all models finish
+    """
+    messages = [{"role": "user", "content": user_query}]
+    
+    # Track accumulated responses for each model
+    model_responses: Dict[str, str] = {model: "" for model in COUNCIL_MODELS}
+    
+    # Stream from all models in parallel
+    async for chunk in query_models_parallel_stream(COUNCIL_MODELS, messages, api_key):
+        model = chunk["model"]
+        token = chunk["token"]
+        done = chunk.get("done", False)
+        
+        if token:
+            # Accumulate the token
+            model_responses[model] += token
+            # Yield the token
+            yield ("token", {"model": model, "token": token})
+        
+        if done and "error" in chunk:
+            print(f"Model {model} failed: {chunk['error']}")
+    
+    # Build final results
+    stage1_results = []
+    for model, response in model_responses.items():
+        if response:  # Only include models that produced responses
+            stage1_results.append(
+                ModelResponseSchema(
+                    model=model,
+                    response=response
+                )
+            )
+    
+    # Yield complete results
+    yield ("complete", stage1_results)
+
+
+async def stage2_collect_rankings_stream(
+    user_query: str,
+    stage1_results: List[ModelResponseSchema],
+    api_key: str
+) -> AsyncGenerator[Tuple[str, Any], None]:
+    """
+    Stage 2: Each model ranks the anonymized responses with streaming.
+
+    Args:
+        user_query: The original user query
+        stage1_results: Results from Stage 1
+        api_key: OpenRouter API key
+
+    Yields:
+        Tuple of ("token", {"model": str, "token": str}) for each token
+        Tuple of ("complete", {"rankings": List[ModelRankingSchema], "label_to_model": Dict}) when done
+    """
+    # Create anonymized labels for responses (Response A, Response B, etc.)
+    labels = [chr(65 + i) for i in range(len(stage1_results))]  # A, B, C, ...
+
+    # Create mapping from label to model name
+    label_to_model = {
+        f"Response {label}": result.model
+        for label, result in zip(labels, stage1_results)
+    }
+
+    # Build the ranking prompt
+    responses_text = "\n\n".join([
+        f"Response {label}:\n{result.response}"
+        for label, result in zip(labels, stage1_results)
+    ])
+
+    ranking_prompt = f"""Your task is to assess multiple responses to this question:
+Question: {user_query}
+Below are the model responses (identities hidden):
+{responses_text}
+What you need to do:
+
+1. Begin by analyzing each response on its own merits. For every response, identify its strengths and weaknesses.
+2. After completing your analysis, conclude with a definitive ranking.
+
+CRITICAL: The final ranking must follow this EXACT format:
+
+- Begin with "FINAL RANKING:" (capitalized, followed by a colon)
+- List responses in order from best to worst using a numbered format
+- Format each entry as: number, period, space, response label only (e.g., "1. Response A")
+- Include nothing else—no additional commentary or explanations in this ranking section
+
+Here's how your complete response should look:
+Response A demonstrates strong coverage of X, though it overlooks Y...
+Response B maintains accuracy but doesn't fully explore Z...
+Response C delivers the most thorough treatment of the topic...
+FINAL RANKING:
+1. Response C
+2. Response A
+3. Response B
+
+Please proceed with your evaluation and ranking:"""
+
+    messages = [{"role": "user", "content": ranking_prompt}]
+    
+    # Track accumulated rankings for each model
+    model_rankings: Dict[str, str] = {model: "" for model in COUNCIL_MODELS}
+    
+    # Stream from all models in parallel
+    async for chunk in query_models_parallel_stream(COUNCIL_MODELS, messages, api_key):
+        model = chunk["model"]
+        token = chunk["token"]
+        done = chunk.get("done", False)
+        
+        if token:
+            # Accumulate the token
+            model_rankings[model] += token
+            # Yield the token
+            yield ("token", {"model": model, "token": token})
+        
+        if done and "error" in chunk:
+            print(f"Model {model} failed ranking: {chunk['error']}")
+    
+    # Build final results
+    stage2_results = []
+    for model, full_text in model_rankings.items():
+        if full_text:
+            # Parse as anonymous labels first, then map to model names
+            parsed_labels = parse_ranking_from_text(full_text)
+            parsed_model_ranking = [
+                label_to_model[label]
+                for label in parsed_labels
+                if label in label_to_model
+            ]
+            stage2_results.append(
+                ModelRankingSchema(
+                    model=model,
+                    ranking=full_text,
+                    parsed_ranking=parsed_model_ranking
+                )
+            )
+    
+    # Yield complete results
+    yield ("complete", {
+        "rankings": stage2_results,
+        "label_to_model": label_to_model
+    })
+
+
+async def stage3_synthesize_final_stream(
+    user_query: str,
+    stage1_results: List[ModelResponseSchema],
+    stage2_results: List[ModelRankingSchema],
+    api_key: str
+) -> AsyncGenerator[Tuple[str, Any], None]:
+    """
+    Stage 3: Arbiter synthesizes final response with streaming.
+
+    Args:
+        user_query: The original user query
+        stage1_results: Individual model responses from Stage 1
+        stage2_results: Rankings from Stage 2
+        api_key: OpenRouter API key
+
+    Yields:
+        Tuple of ("token", {"token": str}) for each token
+        Tuple of ("complete", Stage3ResultSchema) when done
+    """
+    # Build comprehensive context for arbiter
+    stage1_text = "\n\n".join([
+        f"Model: {result.model}\nResponse: {result.response}"
+        for result in stage1_results
+    ])
+
+    stage2_text = "\n\n".join([
+        f"Model: {result.model}\nRanking: {result.ranking}"
+        for result in stage2_results
+    ])
+
+    arbiter_prompt = f"""You serve as the Lead Arbiter of an LLM Council. Several language models have submitted answers to a user's inquiry, followed by evaluating one another's contributions.
+
+User's Original Inquiry: {user_query}
+
+PHASE 1 - Model Submissions:
+{stage1_text}
+
+PHASE 2 - Cross-Model Assessments:
+{stage2_text}
+
+As Lead Arbiter, your responsibility is to consolidate this information into one thorough, precise response to the user's initial question. Take into account:
+- Each model's submission and the insights they offer
+- The cross-evaluations and their implications for answer quality
+- Any observable consensus or divergence among assessments
+
+Deliver a lucid, logically sound final response that embodies the council's combined expertise:"""
+
+    messages = [{"role": "user", "content": arbiter_prompt}]
+    
+    # Track accumulated response
+    full_response = ""
+    
+    # Stream from arbiter model
+    async for chunk in query_model_stream(ARBITER_MODEL, messages, api_key):
+        token = chunk["token"]
+        done = chunk.get("done", False)
+        
+        if token:
+            # Accumulate the token
+            full_response += token
+            # Yield the token
+            yield ("token", {"token": token})
+        
+        if done and "error" in chunk:
+            print(f"Arbiter model failed: {chunk['error']}")
+            # Yield error result
+            yield ("complete", Stage3ResultSchema(
+                model=ARBITER_MODEL,
+                response="Error: Unable to generate final synthesis.",
+                aggregate_ranking=[]
+            ))
+            return
+    
+    # Yield complete result
+    yield ("complete", Stage3ResultSchema(
+        model=ARBITER_MODEL,
+        response=full_response if full_response else "Error: No response generated.",
+        aggregate_ranking=[]
+    ))

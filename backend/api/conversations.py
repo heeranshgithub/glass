@@ -220,15 +220,19 @@ async def send_message_stream(
                     CouncilService.generate_title(request.content, api_key)
                 )
             
-            # Run council stages
+            # Run council stages with streaming
             stage1_results = None
             stage2_results = None
             stage3_result = None
             metadata = {}
             
-            async for stage_name, data in CouncilService.run_council_staged(request.content, api_key):
+            async for stage_name, data in CouncilService.run_council_staged_stream(request.content, api_key):
                 if stage_name == "stage1_start":
                     yield f"data: {json.dumps({'type': 'stage1Start'})}\n\n"
+                
+                elif stage_name == "stage1_token":
+                    # Stream token from Stage 1: data = {"model": str, "token": str}
+                    yield f"data: {json.dumps({'type': 'stage1Token', 'model': data['model'], 'token': data['token']})}\n\n"
                 
                 elif stage_name == "stage1_complete":
                     stage1_results = data
@@ -237,6 +241,10 @@ async def send_message_stream(
                 elif stage_name == "stage2_start":
                     yield f"data: {json.dumps({'type': 'stage2Start'})}\n\n"
                 
+                elif stage_name == "stage2_token":
+                    # Stream token from Stage 2: data = {"model": str, "token": str}
+                    yield f"data: {json.dumps({'type': 'stage2Token', 'model': data['model'], 'token': data['token']})}\n\n"
+                
                 elif stage_name == "stage2_complete":
                     stage2_results = data["data"]
                     metadata = data["metadata"]
@@ -244,6 +252,10 @@ async def send_message_stream(
                 
                 elif stage_name == "stage3_start":
                     yield f"data: {json.dumps({'type': 'stage3Start'})}\n\n"
+                
+                elif stage_name == "stage3_token":
+                    # Stream token from Stage 3: data = {"token": str}
+                    yield f"data: {json.dumps({'type': 'stage3Token', 'token': data['token']})}\n\n"
                 
                 elif stage_name == "stage3_complete":
                     stage3_result = data
