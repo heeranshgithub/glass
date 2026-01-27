@@ -4,10 +4,10 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   // Only apply waitlist protection in production
   // In development, allow all routes for testing
-  if (process.env.NODE_ENV !== 'production') {
+  // if (process.env.NODE_ENV !== 'production') {
   // if (process.env.NODE_ENV === 'production') {
-    return NextResponse.next();
-  }
+  return NextResponse.next();
+  // }
 
   const { pathname } = request.nextUrl;
 
