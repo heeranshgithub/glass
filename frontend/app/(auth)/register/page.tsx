@@ -138,24 +138,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">Username (optional)</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                  @
-                </span>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="johndoe"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
