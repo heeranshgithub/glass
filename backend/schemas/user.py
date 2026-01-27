@@ -20,6 +20,10 @@ class UserResponse(CamelSchema):
     last_login: Optional[datetime] = None
     roles: List[str]
     has_open_router_key: bool
+    daily_request_count: int = 0
+    daily_request_limit: Optional[int] = None
+    last_request_date: Optional[datetime] = None
+    is_demo: Optional[bool] = None
     
     model_config = camel_config(
         json_schema_extra={
@@ -34,7 +38,11 @@ class UserResponse(CamelSchema):
                 "isVerified": False,
                 "lastLogin": None,
                 "roles": ["user"],
-                "hasOpenRouterKey": False
+                "hasOpenRouterKey": False,
+                "dailyRequestCount": 0,
+                "dailyRequestLimit": None,
+                "lastRequestDate": None,
+                "isDemo": None
             }
         }
     )

@@ -6,6 +6,7 @@ import { useAppSelector } from '@/lib/store';
 import { useGetCurrentUserQuery } from '@/lib/store/api/userApi';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { OpenRouterKeyModal } from '@/components/modals/OpenRouterKeyModal';
+import { RateLimitBanner } from '@/components/dashboard/RateLimitBanner';
 import { Hexagon } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -82,6 +83,7 @@ export default function DashboardLayout({
             sidebarOpen ? 'lg:ml-72' : 'lg:ml-16'
           }`}
         >
+          {user && <RateLimitBanner user={user} />}
           {children}
         </main>
       </div>

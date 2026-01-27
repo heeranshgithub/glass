@@ -67,6 +67,13 @@ export const authApi = baseApi.injectEndpoints({
       query: () => '/auth/status',
       providesTags: ['User'],
     }),
+
+    demoLogin: builder.mutation<TokenResponse, void>({
+      query: () => ({
+        url: '/auth/demo-login',
+        method: 'POST',
+      }),
+    }),
   }),
 });
 
@@ -78,4 +85,5 @@ export const {
   useLogoutAllMutation,
   useChangePasswordMutation,
   useGetAuthStatusQuery,
+  useDemoLoginMutation,
 } = authApi;

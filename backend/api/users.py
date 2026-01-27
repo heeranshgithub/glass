@@ -20,6 +20,8 @@ from schemas.user import (
 )
 from pydantic import Field
 from schemas.base import CamelSchema, camel_config
+from app.config import DEMO_EMAIL
+from services.rate_limit_service import RateLimitService
 
 router = APIRouter()
 
@@ -63,6 +65,10 @@ def _user_doc_to_response(user_doc: dict) -> UserResponse:
         last_login=user_doc.get("last_login"),
         roles=user_doc.get("roles", ["user"]),
         has_open_router_key=bool(user_doc.get("openrouter_api_key_encrypted")),
+        daily_request_count=user_doc.get("daily_request_count", 0),
+        daily_request_limit=user_doc.get("daily_request_limit"),
+        last_request_date=user_doc.get("last_request_date"),
+        is_demo=True if user_doc["email"] == DEMO_EMAIL else None,
     )
 
 
@@ -408,3 +414,44 @@ async def remove_user_role(
     if not user_doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return _user_doc_to_response(user_doc)
+
+
+@router.post("/demo/reset-limit", response_model=UserResponse)
+async def reset_demo_user_limit(
+    _: UserInDB = Depends(get_current_admin_user),
+    db: AsyncIOMotorDatabase = Depends(get_db),
+):
+    """
+    Reset the demo user's daily request count to 0 (admin only).
+    
+    This allows the demo user to make their full allocation of requests again.
+    """
+    if not DEMO_EMAIL:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Demo email not configured"
+        )
+    
+    users = db[USERS_COLLECTION]
+    
+    # Find demo user
+    demo_user = await users.find_one({"email": DEMO_EMAIL})
+    if not demo_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Demo user not found"
+        )
+    
+    # Reset the limit using rate limit service
+    rate_limit_service = RateLimitService(db)
+    success = await rate_limit_service.reset_user_limit(str(demo_user["_id"]))
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reset demo user limit"
+        )
+    
+    # Return updated user
+    updated_user = await users.find_one({"_id": demo_user["_id"]})
+    return _user_doc_to_response(updated_user)

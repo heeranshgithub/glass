@@ -15,6 +15,7 @@ from schemas.auth import (
     LogoutRequest,
     AuthStatusResponse,
 )
+from app.config import DEMO_EMAIL, DEMO_PASS
 
 router = APIRouter()
 
@@ -190,3 +191,41 @@ async def auth_status(
         full_name=current_user.full_name,
         roles=current_user.roles
     )
+
+
+@router.post("/demo-login", response_model=TokenResponse)
+async def demo_login(
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """
+    Auto-login endpoint for demo user.
+    
+    This is a public endpoint that logs in the demo user automatically.
+    Returns access and refresh tokens.
+    """
+    if not DEMO_EMAIL or not DEMO_PASS:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Demo login is not configured"
+        )
+    
+    auth_service = AuthService(db)
+    
+    user = await auth_service.authenticate_user(
+        email=DEMO_EMAIL,
+        password=DEMO_PASS
+    )
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Demo user not found or credentials invalid"
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Demo user account is inactive"
+        )
+    
+    return await auth_service.create_tokens(user.id)

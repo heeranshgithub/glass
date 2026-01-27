@@ -81,6 +81,9 @@ class UserInDB(UserBase):
     last_login: Optional[datetime] = None
     roles: List[str] = ["user"]
     openrouter_api_key_encrypted: Optional[str] = None
+    daily_request_count: int = 0
+    daily_request_limit: Optional[int] = None
+    last_request_date: Optional[datetime] = None
     
     @field_validator("id", mode="before")
     @classmethod
@@ -126,6 +129,9 @@ def create_user_document(
         "last_login": None,
         "roles": ["user"],
         "openrouter_api_key_encrypted": None,
+        "daily_request_count": 0,
+        "daily_request_limit": None,
+        "last_request_date": None,
     }
 
 

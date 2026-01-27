@@ -67,4 +67,9 @@ if _smtp_security_env:
 else:
     SMTP_SECURITY = "ssl" if SMTP_PORT == 465 else "starttls"
 
+# Demo and Admin Configuration
+DEMO_EMAIL = os.getenv("DEMO_EMAIL", "")
+DEMO_PASS = os.getenv("DEMO_PASS", "")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "")
+
 

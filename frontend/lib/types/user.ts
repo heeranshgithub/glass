@@ -15,6 +15,10 @@ export interface UserResponse {
 
 export interface UserProfileResponse extends UserResponse {
   lastLogin?: string;
+  dailyRequestCount?: number;
+  dailyRequestLimit?: number | null;
+  lastRequestDate?: string;
+  isDemo?: boolean | null;
 }
 
 export interface UserUpdate {

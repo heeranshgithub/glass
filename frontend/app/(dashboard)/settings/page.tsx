@@ -10,6 +10,7 @@ import {
   useLogoutAllMutation,
   useSetOpenRouterKeyMutation,
   useRemoveOpenRouterKeyMutation,
+  useResetDemoLimitMutation,
   setTheme,
 } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,8 @@ import {
   Monitor,
   Key,
   Trash2,
+  Shield,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -55,6 +58,8 @@ export default function SettingsPage() {
     useSetOpenRouterKeyMutation();
   const [removeOpenRouterKey, { isLoading: isRemovingKey }] =
     useRemoveOpenRouterKeyMutation();
+  const [resetDemoLimit, { isLoading: isResettingDemoLimit }] =
+    useResetDemoLimitMutation();
 
   const [profileForm, setProfileForm] = useState({
     fullName: '',
@@ -71,7 +76,12 @@ export default function SettingsPage() {
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [apiKeySuccess, setApiKeySuccess] = useState(false);
+  const [demoResetSuccess, setDemoResetSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if user is demo or admin
+  const isDemo = user?.isDemo === true;
+  const isAdmin = user?.roles?.includes('admin') || false;
 
   // Initialize form when user data loads
   useEffect(() => {
@@ -134,6 +144,21 @@ export default function SettingsPage() {
       await logoutAll().unwrap();
     } catch (err) {
       console.error('Failed to logout all devices:', err);
+    }
+  };
+
+  const handleResetDemoLimit = async () => {
+    setError(null);
+    setDemoResetSuccess(false);
+
+    try {
+      await resetDemoLimit().unwrap();
+      setDemoResetSuccess(true);
+      setTimeout(() => setDemoResetSuccess(false), 3000);
+    } catch (err: any) {
+      const errorMessage =
+        err?.data?.detail || 'Failed to reset demo limit. Please try again.';
+      setError(errorMessage);
     }
   };
 
@@ -203,7 +228,14 @@ export default function SettingsPage() {
                       fullName: e.target.value,
                     }))
                   }
+                  disabled={isDemo}
+                  className={isDemo ? 'bg-muted' : ''}
                 />
+                {isDemo && (
+                  <p className="text-xs text-muted-foreground">
+                    Profile editing is disabled for demo accounts
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -218,6 +250,8 @@ export default function SettingsPage() {
                     }))
                   }
                   placeholder="Optional"
+                  disabled={isDemo}
+                  className={isDemo ? 'bg-muted' : ''}
                 />
               </div>
 
@@ -241,23 +275,25 @@ export default function SettingsPage() {
                 ))}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isUpdating}>
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : profileSuccess ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Saved!
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
-            </CardFooter>
+            {!isDemo && (
+              <CardFooter>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : profileSuccess ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Saved!
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </CardFooter>
+            )}
           </form>
         </Card>
 
@@ -293,8 +329,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Password Section */}
-        <Card>
+        {/* Password Section - Hidden for demo users */}
+        {!isDemo && <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
@@ -372,10 +408,10 @@ export default function SettingsPage() {
               </Button>
             </CardFooter>
           </form>
-        </Card>
+        </Card>}
 
-        {/* OpenRouter API Key Section */}
-        <Card>
+        {/* OpenRouter API Key Section - Hidden for demo users */}
+        {!isDemo && <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Key className="h-5 w-5" />
@@ -598,7 +634,54 @@ export default function SettingsPage() {
               </form>
             )}
           </CardContent>
-        </Card>
+        </Card>}
+
+        {/* Admin Section - Only for admins */}
+        {isAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Admin Controls
+              </CardTitle>
+              <CardDescription>
+                Manage demo account settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <div>
+                  <div className="font-medium">Demo Account Management</div>
+                  <div className="text-sm text-muted-foreground">
+                    Reset the demo user's daily request limit back to 3
+                  </div>
+                </div>
+                <Button
+                  onClick={handleResetDemoLimit}
+                  disabled={isResettingDemoLimit}
+                  variant="default"
+                >
+                  {isResettingDemoLimit ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Resetting...
+                    </>
+                  ) : demoResetSuccess ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Reset!
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Reset Demo Limit
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Security Section */}
         <Card>

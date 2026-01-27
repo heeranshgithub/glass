@@ -10,6 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from core.dependencies import get_db, get_current_active_user
 from services.conversation_service import ConversationService
 from services.council_service import CouncilService
+from services.rate_limit_service import RateLimitService
 from api.users import get_user_openrouter_key
 from models.user import UserInDB
 from schemas.conversation import (
@@ -200,6 +201,16 @@ async def send_message_stream(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="OpenRouter API key not configured. Please add your API key in settings."
+        )
+    
+    # Check rate limit before processing
+    rate_limit_service = RateLimitService(db)
+    allowed, remaining, error_msg = await rate_limit_service.check_and_increment_limit(current_user.id)
+    
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=error_msg or "Rate limit exceeded"
         )
     
     is_first_message = len(conversation.messages) == 0

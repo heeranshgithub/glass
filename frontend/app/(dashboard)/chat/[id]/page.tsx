@@ -11,7 +11,7 @@ import {
 import { streamConversationMessage } from '@/lib/store/api/councilApi';
 import { ChatMessages } from '@/components/chat/ChatMessages';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle, Mail } from 'lucide-react';
 import type {
   Message,
   AssistantMessage,
@@ -109,7 +109,10 @@ export default function ChatPage() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'heeranshconnect@gmail.com';
 
   // Set current conversation ID and initialize messages
   useEffect(() => {
@@ -129,6 +132,7 @@ export default function ChatPage() {
   const sendMessageStream = useCallback(
     async (content: string) => {
       setIsStreaming(true);
+      setRateLimitError(null);
 
       // Optimistically add user message
       const userMessage: Message = { role: 'user', content };
@@ -160,6 +164,16 @@ export default function ChatPage() {
         });
 
         if (!response.ok) {
+          // Check for rate limit error
+          if (response.status === 429) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.detail || 'Rate limit exceeded. Please try again later.';
+            setRateLimitError(errorMessage);
+            // Remove optimistic messages
+            setMessages(prev => prev.slice(0, -2));
+            setIsStreaming(false);
+            return;
+          }
           throw new Error('Failed to send message');
         }
 
@@ -200,7 +214,7 @@ export default function ChatPage() {
         refetch();
       }
     },
-    [conversationId, refetch]
+    [conversationId, refetch, token]
   );
 
   const handleStreamEvent = (event: StreamEvent) => {
@@ -324,6 +338,27 @@ export default function ChatPage() {
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <ChatMessages messages={messages} isLoading={isStreaming} />
+      {rateLimitError && (
+        <div className="mx-4 mb-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <div className="flex items-start gap-2 text-sm">
+            <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-destructive font-medium">{rateLimitError}</p>
+              <p className="text-destructive/80 text-xs mt-1">
+                Contact us at{' '}
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="underline hover:opacity-80 inline-flex items-center gap-1"
+                >
+                  <Mail className="h-3 w-3" />
+                  {contactEmail}
+                </a>{' '}
+                to request more access.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <ChatInput
         onSendMessage={handleSendMessage}
         isLoading={isStreaming}

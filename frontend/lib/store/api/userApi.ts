@@ -92,6 +92,14 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
+
+    // Admin: Reset demo user's daily limit
+    resetDemoLimit: builder.mutation<UserResponse, void>({
+      query: () => ({
+        url: '/users/demo/reset-limit',
+        method: 'POST',
+      }),
+    }),
   }),
 });
 
@@ -106,4 +114,5 @@ export const {
   useRemoveUserRoleMutation,
   useSetOpenRouterKeyMutation,
   useRemoveOpenRouterKeyMutation,
+  useResetDemoLimitMutation,
 } = userApi;
