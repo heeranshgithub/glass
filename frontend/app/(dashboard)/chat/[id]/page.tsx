@@ -9,6 +9,7 @@ import {
   useGetConversationQuery,
 } from '@/lib/store';
 import { streamConversationMessage } from '@/lib/store/api/councilApi';
+import { userApi } from '@/lib/store/api/userApi';
 import { ChatMessages } from '@/components/chat/ChatMessages';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { Loader2, AlertCircle, Mail } from 'lucide-react';
@@ -153,6 +154,7 @@ export default function ChatPage() {
       };
       setMessages(prev => [...prev, assistantMessage]);
 
+      let requestSucceeded = false;
       try {
         abortControllerRef.current = new AbortController();
 
@@ -176,6 +178,9 @@ export default function ChatPage() {
           }
           throw new Error('Failed to send message');
         }
+
+        // Response is OK, which means rate limit check passed and count was incremented
+        requestSucceeded = true;
 
         const reader = response.body?.getReader();
         if (!reader) throw new Error('No response body');
@@ -212,6 +217,11 @@ export default function ChatPage() {
         abortControllerRef.current = null;
         // Refetch to sync with server
         refetch();
+        // Invalidate user data to update rate limit banner
+        // Only invalidate if request succeeded (response was OK), meaning the count was incremented
+        if (requestSucceeded) {
+          dispatch(userApi.util.invalidateTags(['User']));
+        }
       }
     },
     [conversationId, refetch, token]
