@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDemoLoginMutation } from '@/lib/store/api/authApi';
 import { useAppDispatch } from '@/lib/store';
-import { setCredentials } from '@/lib/store/slices/authSlice';
+import { setTokens } from '@/lib/store/slices/authSlice';
 import { Hexagon, AlertCircle } from 'lucide-react';
 
 export default function DemoPage() {
@@ -17,14 +17,9 @@ export default function DemoPage() {
     const performDemoLogin = async () => {
       try {
         const tokens = await demoLogin().unwrap();
-        
-        // Store tokens in Redux
-        dispatch(
-          setCredentials({
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-          })
-        );
+
+        // Store tokens in Redux (TokenResponse shape)
+        dispatch(setTokens(tokens));
 
         // Redirect to home
         router.push('/home');
