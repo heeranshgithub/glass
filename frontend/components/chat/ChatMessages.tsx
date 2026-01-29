@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Stage1Display } from './Stage1Display';
 import { Stage2Display } from './Stage2Display';
@@ -15,12 +14,6 @@ interface ChatMessagesProps {
 }
 
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 bg-gradient-radial">
@@ -118,8 +111,6 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
             </span>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
     </div>
   );
@@ -148,7 +139,51 @@ function UserMessage({ content }: { content: string }) {
 }
 
 function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
-  const hasContent = message.stage1 || message.stage2 || message.stage3;
+  // Check if each stage is streaming (has streaming data but not complete data)
+  const isStage1Streaming =
+    !message.stage1 &&
+    message.streaming?.stage1Models &&
+    Object.keys(message.streaming.stage1Models).length > 0;
+  const isStage2Streaming =
+    !message.stage2 &&
+    message.streaming?.stage2Models &&
+    Object.keys(message.streaming.stage2Models).length > 0;
+  const isStage3Streaming = !message.stage3 && !!message.streaming?.stage3Text;
+
+  // Convert streaming data to proper types for Stage components
+  const stage1Data =
+    message.stage1 ||
+    (isStage1Streaming
+      ? Object.entries(message.streaming!.stage1Models!).map(
+          ([model, response]) => ({
+            model,
+            response,
+          })
+        )
+      : null);
+
+  const stage2Data =
+    message.stage2 ||
+    (isStage2Streaming
+      ? Object.entries(message.streaming!.stage2Models!).map(
+          ([model, ranking]) => ({
+            model,
+            ranking,
+            parsedRanking: [], // Empty during streaming
+          })
+        )
+      : null);
+
+  const stage3Data =
+    message.stage3 ||
+    (isStage3Streaming
+      ? {
+          model: '', // Will show "Unknown" until complete
+          response: message.streaming!.stage3Text!,
+        }
+      : null);
+
+  const hasContent = stage1Data || stage2Data || stage3Data;
   const hasLoading =
     message.loading?.stage1 ||
     message.loading?.stage2 ||
@@ -179,27 +214,23 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
             stage={1}
           />
         )}
-        {/* Show streaming Stage 1 */}
-        {message.streaming?.stage1Models &&
-          Object.keys(message.streaming.stage1Models).length > 0 && (
-            <StreamingStage1Display models={message.streaming.stage1Models} />
-          )}
-        {message.stage1 && <Stage1Display responses={message.stage1} />}
+        {stage1Data && (
+          <Stage1Display
+            responses={stage1Data}
+            isStreaming={isStage1Streaming}
+          />
+        )}
 
         {/* Stage 2 */}
         {message.loading?.stage2 && (
           <LoadingStage label="Stage 2: Running peer rankings..." stage={2} />
         )}
-        {/* Show streaming Stage 2 */}
-        {message.streaming?.stage2Models &&
-          Object.keys(message.streaming.stage2Models).length > 0 && (
-            <StreamingStage2Display models={message.streaming.stage2Models} />
-          )}
-        {message.stage2 && (
+        {stage2Data && (
           <Stage2Display
-            rankings={message.stage2}
+            rankings={stage2Data}
             labelToModel={message.metadata?.labelToModel}
             aggregateRanking={message.metadata?.aggregateRanking}
+            isStreaming={isStage2Streaming}
           />
         )}
 
@@ -210,11 +241,12 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
             stage={3}
           />
         )}
-        {/* Show streaming Stage 3 */}
-        {message.streaming?.stage3Text && (
-          <StreamingStage3Display text={message.streaming.stage3Text} />
+        {stage3Data && (
+          <Stage3Display
+            response={stage3Data}
+            isStreaming={isStage3Streaming}
+          />
         )}
-        {message.stage3 && <Stage3Display response={message.stage3} />}
 
         {!hasContent && !hasLoading && (
           <div className="glass rounded-xl p-4 text-muted-foreground italic border border-border/30">
@@ -266,96 +298,6 @@ function LoadingStage({ label, stage }: { label: string; stage: number }) {
       <span className="text-sm font-medium">{label}</span>
       <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
         <div className="h-full w-1/3 rounded-full animate-shimmer bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      </div>
-    </div>
-  );
-}
-
-function StreamingStage1Display({
-  models,
-}: {
-  models: Record<string, string>;
-}) {
-  const getModelShortName = (model: string) => {
-    const parts = model.split('/');
-    return parts[parts.length - 1] || model;
-  };
-
-  return (
-    <div className="glass rounded-xl border border-chart-1/30 overflow-hidden bg-gradient-to-br from-chart-1/5 to-transparent">
-      <div className="px-4 py-3 border-b border-chart-1/20 bg-chart-1/5 flex items-center gap-3">
-        <Brain className="h-4 w-4 text-chart-1" />
-        <span className="text-sm font-medium">Stage 1: Models Responding...</span>
-      </div>
-      <div className="p-4 space-y-4">
-        {Object.entries(models).map(([model, text]) => (
-          <div key={model} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <code className="text-xs text-muted-foreground font-mono">
-                {getModelShortName(model)}
-              </code>
-              <Loader2 className="h-3 w-3 animate-spin text-chart-1" />
-            </div>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>{text}</ReactMarkdown>
-              <span className="inline-block w-2 h-4 bg-chart-1 animate-pulse ml-1" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StreamingStage2Display({
-  models,
-}: {
-  models: Record<string, string>;
-}) {
-  const getModelShortName = (model: string) => {
-    const parts = model.split('/');
-    return parts[parts.length - 1] || model;
-  };
-
-  return (
-    <div className="glass rounded-xl border border-chart-2/30 overflow-hidden bg-gradient-to-br from-chart-2/5 to-transparent">
-      <div className="px-4 py-3 border-b border-chart-2/20 bg-chart-2/5 flex items-center gap-3">
-        <Brain className="h-4 w-4 text-chart-2" />
-        <span className="text-sm font-medium">Stage 2: Models Ranking...</span>
-      </div>
-      <div className="p-4 space-y-4">
-        {Object.entries(models).map(([model, text]) => (
-          <div key={model} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <code className="text-xs text-muted-foreground font-mono">
-                {getModelShortName(model)}
-              </code>
-              <Loader2 className="h-3 w-3 animate-spin text-chart-2" />
-            </div>
-            <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
-              <ReactMarkdown>{text}</ReactMarkdown>
-              <span className="inline-block w-2 h-4 bg-chart-2 animate-pulse ml-1" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StreamingStage3Display({ text }: { text: string }) {
-  return (
-    <div className="glass rounded-xl border border-chart-3/30 overflow-hidden bg-gradient-to-br from-chart-3/5 to-transparent">
-      <div className="px-4 py-3 border-b border-chart-3/20 bg-chart-3/5 flex items-center gap-3">
-        <Sparkles className="h-4 w-4 text-chart-3" />
-        <span className="text-sm font-medium">Stage 3: Final Answer...</span>
-        <Loader2 className="h-3 w-3 animate-spin text-chart-3 ml-auto" />
-      </div>
-      <div className="p-5">
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <ReactMarkdown>{text}</ReactMarkdown>
-          <span className="inline-block w-2 h-4 bg-chart-3 animate-pulse ml-1" />
-        </div>
       </div>
     </div>
   );

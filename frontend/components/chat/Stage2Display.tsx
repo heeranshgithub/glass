@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Scale, Trophy, Medal, Check, TrendingUp } from 'lucide-react';
+import { Scale, Trophy, Medal, Check, TrendingUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Stage2Ranking, AggregateRanking } from '@/lib/types';
 
@@ -19,6 +19,7 @@ interface Stage2DisplayProps {
   rankings: Stage2Ranking[];
   labelToModel?: Record<string, string>;
   aggregateRanking?: AggregateRanking[];
+  isStreaming?: boolean;
 }
 
 function deAnonymizeText(
@@ -39,6 +40,7 @@ export function Stage2Display({
   rankings,
   labelToModel,
   aggregateRanking,
+  isStreaming,
 }: Stage2DisplayProps) {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -114,7 +116,16 @@ export function Stage2Display({
                   labelToModel
                 )}
               </ReactMarkdown>
+              {isStreaming && (
+                <span className="inline-block w-2 h-4 bg-chart-2 animate-pulse ml-1" />
+              )}
             </div>
+            {isStreaming && (
+              <div className="flex items-center gap-2 text-xs text-chart-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span className="font-medium">Streaming ranking...</span>
+              </div>
+            )}
 
             {/* Parsed Ranking */}
             {rankings[activeTab]?.parsedRanking &&
@@ -176,7 +187,8 @@ export function Stage2Display({
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Combined results across all peer evaluations (score higher = better)
+                Combined results across all peer evaluations (score higher =
+                better)
               </p>
             </div>
             <div className="p-4 space-y-2">
