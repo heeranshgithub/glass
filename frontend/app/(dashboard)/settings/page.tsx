@@ -330,106 +330,226 @@ export default function SettingsPage() {
         </Card>
 
         {/* Password Section - Hidden for demo users */}
-        {!isDemo && <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Password
-            </CardTitle>
-            <CardDescription>Change your password</CardDescription>
-          </CardHeader>
-          <form onSubmit={handlePasswordChange}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  value={passwordForm.currentPassword}
-                  onChange={e =>
-                    setPasswordForm(prev => ({
-                      ...prev,
-                      currentPassword: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </div>
+        {!isDemo && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Password
+              </CardTitle>
+              <CardDescription>Change your password</CardDescription>
+            </CardHeader>
+            <form onSubmit={handlePasswordChange}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={e =>
+                      setPasswordForm(prev => ({
+                        ...prev,
+                        currentPassword: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
 
-              <Separator />
+                <Separator />
 
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={e =>
-                    setPasswordForm(prev => ({
-                      ...prev,
-                      newPassword: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={e =>
+                      setPasswordForm(prev => ({
+                        ...prev,
+                        newPassword: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={e =>
-                    setPasswordForm(prev => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isChangingPassword}>
-                {isChangingPassword ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Changing...
-                  </>
-                ) : passwordSuccess ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Changed!
-                  </>
-                ) : (
-                  'Change Password'
-                )}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={e =>
+                      setPasswordForm(prev => ({
+                        ...prev,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" disabled={isChangingPassword}>
+                  {isChangingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Changing...
+                    </>
+                  ) : passwordSuccess ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Changed!
+                    </>
+                  ) : (
+                    'Change Password'
+                  )}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        )}
 
         {/* OpenRouter API Key Section - Hidden for demo users */}
-        {!isDemo && <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
-              OpenRouter API Key
-            </CardTitle>
-            <CardDescription>
-              Manage your OpenRouter API key for LLM Council features
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {user?.hasOpenRouterKey ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
-                  <Check className="h-5 w-5 text-green-600" />
-                  <span className="text-sm font-medium">
-                    API key is configured
-                  </span>
+        {!isDemo && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                OpenRouter API Key
+              </CardTitle>
+              <CardDescription>
+                Manage your OpenRouter API key for LLM Council features
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {user?.hasOpenRouterKey ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
+                    <Check className="h-5 w-5 text-green-600" />
+                    <span className="text-sm font-medium">
+                      API key is configured
+                    </span>
+                  </div>
+                  <form
+                    onSubmit={async e => {
+                      e.preventDefault();
+                      setError(null);
+                      setApiKeySuccess(false);
+
+                      if (!apiKeyForm.apiKey.trim()) {
+                        setError('API key is required');
+                        return;
+                      }
+
+                      if (!apiKeyForm.apiKey.startsWith('sk-or-')) {
+                        setError(
+                          'Invalid OpenRouter API key format. Keys must start with "sk-or-"'
+                        );
+                        return;
+                      }
+
+                      try {
+                        await setOpenRouterKey({
+                          apiKey: apiKeyForm.apiKey.trim(),
+                        }).unwrap();
+                        setApiKeySuccess(true);
+                        setApiKeyForm({ apiKey: '' });
+                        setTimeout(() => setApiKeySuccess(false), 3000);
+                      } catch (err: any) {
+                        const errorMessage =
+                          err?.data?.detail ||
+                          'Failed to update API key. Please try again.';
+                        setError(errorMessage);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="apiKey">Update API Key</Label>
+                      <Input
+                        id="apiKey"
+                        type="password"
+                        placeholder="sk-or-..."
+                        value={apiKeyForm.apiKey}
+                        onChange={e => {
+                          setApiKeyForm(prev => ({
+                            ...prev,
+                            apiKey: e.target.value,
+                          }));
+                          setError(null);
+                        }}
+                        disabled={isSettingKey}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Get your API key from{' '}
+                        <a
+                          href="https://openrouter.ai/keys"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          openrouter.ai/keys
+                        </a>
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit" disabled={isSettingKey}>
+                        {isSettingKey ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Updating...
+                          </>
+                        ) : apiKeySuccess ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            Updated!
+                          </>
+                        ) : (
+                          'Update Key'
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={async () => {
+                          if (
+                            confirm(
+                              'Are you sure you want to remove your API key? You will not be able to use LLM Council features until you add a new key.'
+                            )
+                          ) {
+                            try {
+                              await removeOpenRouterKey().unwrap();
+                              setApiKeySuccess(true);
+                              setTimeout(() => setApiKeySuccess(false), 3000);
+                            } catch (err: any) {
+                              const errorMessage =
+                                err?.data?.detail ||
+                                'Failed to remove API key. Please try again.';
+                              setError(errorMessage);
+                            }
+                          }
+                        }}
+                        disabled={isRemovingKey}
+                      >
+                        {isRemovingKey ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Removing...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove Key
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
                 </div>
+              ) : (
                 <form
                   onSubmit={async e => {
                     e.preventDefault();
@@ -458,14 +578,20 @@ export default function SettingsPage() {
                     } catch (err: any) {
                       const errorMessage =
                         err?.data?.detail ||
-                        'Failed to update API key. Please try again.';
+                        'Failed to save API key. Please try again.';
                       setError(errorMessage);
                     }
                   }}
                   className="space-y-4"
                 >
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                      You need to add an OpenRouter API key to use LLM Council
+                      features.
+                    </p>
+                  </div>
                   <div className="space-y-2">
-                    <Label htmlFor="apiKey">Update API Key</Label>
+                    <Label htmlFor="apiKey">OpenRouter API Key</Label>
                     <Input
                       id="apiKey"
                       type="password"
@@ -479,6 +605,7 @@ export default function SettingsPage() {
                         setError(null);
                       }}
                       disabled={isSettingKey}
+                      required
                     />
                     <p className="text-xs text-muted-foreground">
                       Get your API key from{' '}
@@ -492,149 +619,26 @@ export default function SettingsPage() {
                       </a>
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={isSettingKey}>
-                      {isSettingKey ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Updating...
-                        </>
-                      ) : apiKeySuccess ? (
-                        <>
-                          <Check className="mr-2 h-4 w-4" />
-                          Updated!
-                        </>
-                      ) : (
-                        'Update Key'
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={async () => {
-                        if (
-                          confirm(
-                            'Are you sure you want to remove your API key? You will not be able to use LLM Council features until you add a new key.'
-                          )
-                        ) {
-                          try {
-                            await removeOpenRouterKey().unwrap();
-                            setApiKeySuccess(true);
-                            setTimeout(() => setApiKeySuccess(false), 3000);
-                          } catch (err: any) {
-                            const errorMessage =
-                              err?.data?.detail ||
-                              'Failed to remove API key. Please try again.';
-                            setError(errorMessage);
-                          }
-                        }
-                      }}
-                      disabled={isRemovingKey}
-                    >
-                      {isRemovingKey ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Removing...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remove Key
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  <Button type="submit" disabled={isSettingKey}>
+                    {isSettingKey ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : apiKeySuccess ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Saved!
+                      </>
+                    ) : (
+                      'Save API Key'
+                    )}
+                  </Button>
                 </form>
-              </div>
-            ) : (
-              <form
-                onSubmit={async e => {
-                  e.preventDefault();
-                  setError(null);
-                  setApiKeySuccess(false);
-
-                  if (!apiKeyForm.apiKey.trim()) {
-                    setError('API key is required');
-                    return;
-                  }
-
-                  if (!apiKeyForm.apiKey.startsWith('sk-or-')) {
-                    setError(
-                      'Invalid OpenRouter API key format. Keys must start with "sk-or-"'
-                    );
-                    return;
-                  }
-
-                  try {
-                    await setOpenRouterKey({
-                      apiKey: apiKeyForm.apiKey.trim(),
-                    }).unwrap();
-                    setApiKeySuccess(true);
-                    setApiKeyForm({ apiKey: '' });
-                    setTimeout(() => setApiKeySuccess(false), 3000);
-                  } catch (err: any) {
-                    const errorMessage =
-                      err?.data?.detail ||
-                      'Failed to save API key. Please try again.';
-                    setError(errorMessage);
-                  }
-                }}
-                className="space-y-4"
-              >
-                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                  <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                    You need to add an OpenRouter API key to use LLM Council
-                    features.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="apiKey">OpenRouter API Key</Label>
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    placeholder="sk-or-..."
-                    value={apiKeyForm.apiKey}
-                    onChange={e => {
-                      setApiKeyForm(prev => ({
-                        ...prev,
-                        apiKey: e.target.value,
-                      }));
-                      setError(null);
-                    }}
-                    disabled={isSettingKey}
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Get your API key from{' '}
-                    <a
-                      href="https://openrouter.ai/keys"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      openrouter.ai/keys
-                    </a>
-                  </p>
-                </div>
-                <Button type="submit" disabled={isSettingKey}>
-                  {isSettingKey ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : apiKeySuccess ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Saved!
-                    </>
-                  ) : (
-                    'Save API Key'
-                  )}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>}
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Admin Section - Only for admins */}
         {isAdmin && (
@@ -644,9 +648,7 @@ export default function SettingsPage() {
                 <Shield className="h-5 w-5" />
                 Admin Controls
               </CardTitle>
-              <CardDescription>
-                Manage demo account settings
-              </CardDescription>
+              <CardDescription>Manage demo account settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -684,39 +686,41 @@ export default function SettingsPage() {
         )}
 
         {/* Security Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Laptop className="h-5 w-5" />
-              Security
-            </CardTitle>
-            <CardDescription>Manage your active sessions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div>
-                <div className="font-medium">Active Sessions</div>
-                <div className="text-sm text-muted-foreground">
-                  Sign out from all devices except this one
+        {!isDemo && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Laptop className="h-5 w-5" />
+                Security
+              </CardTitle>
+              <CardDescription>Manage your active sessions</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <div>
+                  <div className="font-medium">Active Sessions</div>
+                  <div className="text-sm text-muted-foreground">
+                    Sign out from all devices except this one
+                  </div>
                 </div>
+                <Button
+                  variant="destructive"
+                  onClick={handleLogoutAllDevices}
+                  disabled={isLoggingOutAll}
+                >
+                  {isLoggingOutAll ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing out...
+                    </>
+                  ) : (
+                    'Sign out all devices'
+                  )}
+                </Button>
               </div>
-              <Button
-                variant="destructive"
-                onClick={handleLogoutAllDevices}
-                disabled={isLoggingOutAll}
-              >
-                {isLoggingOutAll ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing out...
-                  </>
-                ) : (
-                  'Sign out all devices'
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
