@@ -88,12 +88,12 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link
+                {/* <Link
                   href="/forgot-password"
                   className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
-                </Link>
+                </Link> */}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -111,7 +111,7 @@ export default function LoginPage() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-4 mt-2">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
@@ -122,16 +122,17 @@ export default function LoginPage() {
                 'Sign in'
               )}
             </Button>
-
-            <p className="text-sm text-center text-muted-foreground">
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/register"
-                className="text-primary font-medium hover:underline"
-              >
-                Create one
-              </Link>
-            </p>
+            {process.env.NODE_ENV !== 'production' && (
+              <p className="text-sm text-center text-muted-foreground">
+                Don&apos;t have an account?{' '}
+                <Link
+                  href="/register"
+                  className="text-primary font-medium hover:underline"
+                >
+                  Create one
+                </Link>
+              </p>
+            )}
           </CardFooter>
         </form>
       </Card>

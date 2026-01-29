@@ -20,6 +20,12 @@ import {
 import { Loader2, Mail, Lock, User, Hexagon, Check, X } from 'lucide-react';
 
 export default function RegisterPage() {
+  if (process.env.NODE_ENV === 'production') {
+    const router = useRouter();
+    router.push('/login'); //TODO: replace with redirect
+    return null;
+  }
+
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [register, { isLoading }] = useRegisterMutation();
