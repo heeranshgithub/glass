@@ -51,8 +51,20 @@ class RateLimitService:
             # Check if we need to reset the count (new day)
             now = datetime.now(timezone.utc)
             today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-            
-            if last_request_date is None or last_request_date < today_start:
+
+            # Normalize last_request_date to an aware datetime in UTC (for old data that may be naive)
+            reset_daily_count = False
+            if last_request_date is None:
+                reset_daily_count = True
+            elif isinstance(last_request_date, datetime):
+                if last_request_date.tzinfo is None:
+                    last_request_date = last_request_date.replace(tzinfo=timezone.utc)
+                reset_daily_count = last_request_date < today_start
+            else:
+                # Unexpected type – be safe and reset the counter
+                reset_daily_count = True
+
+            if reset_daily_count:
                 # Reset count for new day
                 current_count = 0
             
@@ -60,14 +72,14 @@ class RateLimitService:
             if current_count >= daily_limit:
                 return False, 0, f"Daily request limit of {daily_limit} exceeded. Please contact support for more requests."
             
-            # Increment count
+            # Increment count (store last_request_date as UTC-aware so reads can compare safely)
             new_count = current_count + 1
             await self.users.update_one(
                 {"_id": ObjectId(user_id)},
                 {
                     "$set": {
                         "daily_request_count": new_count,
-                        "last_request_date": now,
+                        "last_request_date": now,  # datetime.now(timezone.utc) above
                         "updated_at": now
                     }
                 }
@@ -106,8 +118,19 @@ class RateLimitService:
             # Check if we're in a new day
             now = datetime.now(timezone.utc)
             today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-            
-            if last_request_date is None or last_request_date < today_start:
+
+            # Normalize last_request_date similarly to check_and_increment_limit
+            reset_daily_count = False
+            if last_request_date is None:
+                reset_daily_count = True
+            elif isinstance(last_request_date, datetime):
+                if last_request_date.tzinfo is None:
+                    last_request_date = last_request_date.replace(tzinfo=timezone.utc)
+                reset_daily_count = last_request_date < today_start
+            else:
+                reset_daily_count = True
+
+            if reset_daily_count:
                 # New day, count resets
                 current_count = 0
             

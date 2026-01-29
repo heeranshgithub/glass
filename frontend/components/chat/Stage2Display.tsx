@@ -75,8 +75,7 @@ export function Stage2Display({
           </div>
         </CardTitle>
         <CardDescription className="text-xs mt-2 p-2 rounded-lg bg-chart-2/5 border border-chart-2/10">
-          Each model evaluated all responses anonymously. Model names shown in{' '}
-          <strong>bold</strong> for readability.
+          Each model evaluated all responses anonymously.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
