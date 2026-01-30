@@ -113,7 +113,8 @@ export default function ChatPage() {
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'heeranshconnect@gmail.com';
+  const contactEmail =
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'heeranshconnect@gmail.com';
 
   // Set current conversation ID and initialize messages
   useEffect(() => {
@@ -169,7 +170,9 @@ export default function ChatPage() {
           // Check for rate limit error
           if (response.status === 429) {
             const errorData = await response.json().catch(() => ({}));
-            const errorMessage = errorData.detail || 'Rate limit exceeded. Please try again later.';
+            const errorMessage =
+              errorData.detail ||
+              'Rate limit exceeded. Please try again later.';
             setRateLimitError(errorMessage);
             // Remove optimistic messages
             setMessages(prev => prev.slice(0, -2));
@@ -186,13 +189,21 @@ export default function ChatPage() {
         if (!reader) throw new Error('No response body');
 
         const decoder = new TextDecoder();
+        let buffer = ''; // Buffer to handle partial SSE lines across chunks
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
+          // Append new chunk to buffer
+          buffer += decoder.decode(value, { stream: true });
+
+          // Split by newlines but keep track of incomplete lines
+          const lines = buffer.split('\n');
+
+          // The last element might be incomplete (no trailing newline)
+          // Keep it in the buffer for the next iteration
+          buffer = lines.pop() || '';
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
@@ -201,9 +212,20 @@ export default function ChatPage() {
                 const event: StreamEvent = JSON.parse(data);
                 handleStreamEvent(event);
               } catch {
-                console.error('Failed to parse SSE event');
+                console.error('Failed to parse SSE event:', data);
               }
             }
+          }
+        }
+
+        // Process any remaining data in buffer after stream ends
+        if (buffer.startsWith('data: ')) {
+          const data = buffer.slice(6);
+          try {
+            const event: StreamEvent = JSON.parse(data);
+            handleStreamEvent(event);
+          } catch {
+            // Ignore incomplete final event
           }
         }
       } catch (error) {
@@ -230,97 +252,113 @@ export default function ChatPage() {
   const handleStreamEvent = (event: StreamEvent) => {
     setMessages(prev => {
       const messages = [...prev];
-      const lastMsg = messages[messages.length - 1] as AssistantMessage;
+      const lastMsgIndex = messages.length - 1;
+      const lastMsg = messages[lastMsgIndex] as AssistantMessage;
+
+      // Create a deep copy of the last message to ensure immutability
+      // This is critical for React StrictMode which calls updaters twice
+      const updatedMsg: AssistantMessage = {
+        ...lastMsg,
+        loading: lastMsg.loading ? { ...lastMsg.loading } : undefined,
+        streaming: lastMsg.streaming
+          ? {
+              ...lastMsg.streaming,
+              stage1Models: lastMsg.streaming.stage1Models
+                ? { ...lastMsg.streaming.stage1Models }
+                : undefined,
+              stage2Models: lastMsg.streaming.stage2Models
+                ? { ...lastMsg.streaming.stage2Models }
+                : undefined,
+            }
+          : undefined,
+      };
 
       switch (event.type) {
         case 'stage1Start':
-          lastMsg.loading = { ...lastMsg.loading!, stage1: true };
-          // Initialize streaming state
-          if (!lastMsg.streaming) {
-            lastMsg.streaming = {};
-          }
-          lastMsg.streaming.stage1Models = {};
+          updatedMsg.loading = { ...updatedMsg.loading!, stage1: true };
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage1Models: {},
+          };
           break;
 
-        case 'stage1Token':
-          // Accumulate tokens for each model
-          if (!lastMsg.streaming) {
-            lastMsg.streaming = {};
-          }
-          if (!lastMsg.streaming.stage1Models) {
-            lastMsg.streaming.stage1Models = {};
-          }
-          const modelId1 = event.model!;
-          lastMsg.streaming.stage1Models[modelId1] =
-            (lastMsg.streaming.stage1Models[modelId1] || '') + event.token;
+        case 'stage1Token': {
+          const modelId = event.model!;
+          const currentModels = updatedMsg.streaming?.stage1Models || {};
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage1Models: {
+              ...currentModels,
+              [modelId]: (currentModels[modelId] || '') + event.token,
+            },
+          };
           break;
+        }
 
         case 'stage1Complete':
-          lastMsg.stage1 = event.data as AssistantMessage['stage1'];
-          lastMsg.loading = { ...lastMsg.loading!, stage1: false };
-          // Clear streaming state for stage 1
-          if (lastMsg.streaming) {
-            lastMsg.streaming.stage1Models = undefined;
-          }
+          updatedMsg.stage1 = event.data as AssistantMessage['stage1'];
+          updatedMsg.loading = { ...updatedMsg.loading!, stage1: false };
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage1Models: undefined,
+          };
           break;
 
         case 'stage2Start':
-          lastMsg.loading = { ...lastMsg.loading!, stage2: true };
-          // Initialize streaming state
-          if (!lastMsg.streaming) {
-            lastMsg.streaming = {};
-          }
-          lastMsg.streaming.stage2Models = {};
+          updatedMsg.loading = { ...updatedMsg.loading!, stage2: true };
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage2Models: {},
+          };
           break;
 
-        case 'stage2Token':
-          // Accumulate tokens for each model
-          if (!lastMsg.streaming) {
-            lastMsg.streaming = {};
-          }
-          if (!lastMsg.streaming.stage2Models) {
-            lastMsg.streaming.stage2Models = {};
-          }
-          const modelId2 = event.model!;
-          lastMsg.streaming.stage2Models[modelId2] =
-            (lastMsg.streaming.stage2Models[modelId2] || '') + event.token;
+        case 'stage2Token': {
+          const modelId = event.model!;
+          const currentModels = updatedMsg.streaming?.stage2Models || {};
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage2Models: {
+              ...currentModels,
+              [modelId]: (currentModels[modelId] || '') + event.token,
+            },
+          };
           break;
+        }
 
         case 'stage2Complete':
-          lastMsg.stage2 = event.data as AssistantMessage['stage2'];
-          lastMsg.metadata = event.metadata as CouncilMetadata;
-          lastMsg.loading = { ...lastMsg.loading!, stage2: false };
-          // Clear streaming state for stage 2
-          if (lastMsg.streaming) {
-            lastMsg.streaming.stage2Models = undefined;
-          }
+          updatedMsg.stage2 = event.data as AssistantMessage['stage2'];
+          updatedMsg.metadata = event.metadata as CouncilMetadata;
+          updatedMsg.loading = { ...updatedMsg.loading!, stage2: false };
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage2Models: undefined,
+          };
           break;
 
         case 'stage3Start':
-          lastMsg.loading = { ...lastMsg.loading!, stage3: true };
-          // Initialize streaming state
-          if (!lastMsg.streaming) {
-            lastMsg.streaming = {};
-          }
-          lastMsg.streaming.stage3Text = '';
+          updatedMsg.loading = { ...updatedMsg.loading!, stage3: true };
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage3Text: '',
+          };
           break;
 
-        case 'stage3Token':
-          // Accumulate tokens for final response
-          if (!lastMsg.streaming) {
-            lastMsg.streaming = {};
-          }
-          lastMsg.streaming.stage3Text =
-            (lastMsg.streaming.stage3Text || '') + event.token;
+        case 'stage3Token': {
+          const currentText = updatedMsg.streaming?.stage3Text || '';
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage3Text: currentText + event.token,
+          };
           break;
+        }
 
         case 'stage3Complete':
-          lastMsg.stage3 = event.data as AssistantMessage['stage3'];
-          lastMsg.loading = { ...lastMsg.loading!, stage3: false };
-          // Clear streaming state for stage 3
-          if (lastMsg.streaming) {
-            lastMsg.streaming.stage3Text = undefined;
-          }
+          updatedMsg.stage3 = event.data as AssistantMessage['stage3'];
+          updatedMsg.loading = { ...updatedMsg.loading!, stage3: false };
+          updatedMsg.streaming = {
+            ...updatedMsg.streaming,
+            stage3Text: undefined,
+          };
           break;
 
         case 'error':
@@ -328,6 +366,7 @@ export default function ChatPage() {
           break;
       }
 
+      messages[lastMsgIndex] = updatedMsg;
       return messages;
     });
   };
