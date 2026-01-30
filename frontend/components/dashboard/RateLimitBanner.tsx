@@ -44,7 +44,7 @@ export function RateLimitBanner({ user }: RateLimitBannerProps) {
               className="underline hover:opacity-80 inline-flex items-center gap-1"
             >
               <Mail className="h-3 w-3" />
-              Contact us
+              Contact us at {contactEmail}
             </a>{' '}
             for more requests.
           </>
