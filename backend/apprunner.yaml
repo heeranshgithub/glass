@@ -12,19 +12,23 @@ run:
   network:
     port: 8000
   env:
-    # Application
-    - name: DEBUG
-      value: 'false'
-
-    # AWS Configuration (for Secrets Manager)
+    # AWS Configuration
     - name: AWS_REGION
       value: ap-south-1
 
-    # Database
+    # OpenRouter API Configuration
+    # - name: OPENROUTER_API_KEY   → secret
+
+    # Encryption Configuration
+    # - name: ENCRYPTION_KEY       → secret
+
+    # Database Configuration
+    # - name: MONGODB_URL          → secret
     - name: MONGODB_DB_NAME
       value: glass
 
     # JWT Configuration
+    # - name: JWT_SECRET_KEY       → secret
     - name: JWT_ALGORITHM
       value: HS256
     - name: JWT_ACCESS_TOKEN_EXPIRE_MINUTES
@@ -32,23 +36,21 @@ run:
     - name: JWT_REFRESH_TOKEN_EXPIRE_DAYS
       value: '7'
 
-    # CORS / Frontend
+    # CORS Configuration
     - name: CORS_ORIGINS
-      value: 'https://your-frontend-url.com'  # TODO: Update with actual frontend URL
+      value: 'https://your-frontend-url.com' # TODO: Update with actual frontend URL
 
-    # SMTP Configuration
+    # Debug Mode
+    - name: DEBUG
+      value: 'false'
+
+    # SMTP Configuration (Waitlist/Demo emails)
     - name: SMTP_HOST
       value: smtpout.secureserver.net
     - name: SMTP_PORT
       value: '465'
-
-    # Secrets — inject via App Runner secret references or AWS Secrets Manager
-    # (set these in the App Runner console or via the --secrets flag in the CLI)
-    # - name: MONGODB_URL        → secret
-    # - name: JWT_SECRET_KEY     → secret
-    # - name: ENCRYPTION_KEY     → secret
-    # - name: WAITLIST_EMAIL     → secret
-    # - name: WAITLIST_PASS      → secret
-    # - name: DEMO_EMAIL         → secret
-    # - name: DEMO_PASS          → secret
-    # - name: ADMIN_EMAIL        → secret
+    # - name: WAITLIST_EMAIL       → secret
+    # - name: WAITLIST_PASS        → secret
+    # - name: DEMO_EMAIL           → secret
+    # - name: DEMO_PASS            → secret
+    # - name: ADMIN_EMAIL          → secret
