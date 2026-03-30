@@ -73,8 +73,17 @@ class SecretsService:
                         ) from error
                     logger.warning("Optional secret not found: %s", config.name)
                     continue
-                logger.error("Failed loading secret %s: %s", config.name, error)
-                raise
+                logger.error(
+                    "Failed loading secret %s (code=%s): %s",
+                    config.name,
+                    code,
+                    error,
+                )
+                raise RuntimeError(
+                    f"Failed to load secret '{config.name}' from Secrets Manager "
+                    f"(code={code}). Ensure the App Runner instance role has "
+                    f"secretsmanager:GetSecretValue on this resource."
+                ) from error
 
             secret_value = response.get("SecretString")
             if not secret_value:
