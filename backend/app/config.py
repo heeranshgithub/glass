@@ -4,8 +4,10 @@ import os
 import secrets
 from typing import List
 from dotenv import load_dotenv
+from app.secrets_service import load_aws_secrets
 
 load_dotenv()
+load_aws_secrets()
 
 
 def get_list_from_env(key: str, default: List[str]) -> List[str]:
