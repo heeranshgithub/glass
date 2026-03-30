@@ -3,12 +3,12 @@ runtime: python311
 build:
   commands:
     pre-build:
-      - pip install --upgrade pip
+      - python3 -m pip install --upgrade pip
     build:
-      - pip install .
+      - python3 -m pip install .
 run:
   runtime-version: 3.11.11
-  command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+  command: python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
   network:
     port: 8000
   env:
