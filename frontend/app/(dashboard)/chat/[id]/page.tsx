@@ -1,24 +1,31 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
   useAppDispatch,
   useAppSelector,
+  useAppStore,
+  selectConversationStreamState,
+  clearConversationStreamDraft,
   setCurrentConversationId,
   useGetConversationQuery,
 } from '@/lib/store';
-import { streamConversationMessage } from '@/lib/store/api/councilApi';
-import { userApi } from '@/lib/store/api/userApi';
+import { startConversationStreamRequest } from '@/lib/store/chatStreamManager';
 import { ChatMessages } from '@/components/chat/ChatMessages';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { Loader2, AlertCircle, Mail } from 'lucide-react';
-import type {
-  Message,
-  AssistantMessage,
-  StreamEvent,
-  CouncilMetadata,
-} from '@/lib/types';
+import type { Message, AssistantMessage, CouncilMetadata } from '@/lib/types';
+
+interface Stage3Shape {
+  aggregateRanking?: CouncilMetadata['aggregateRanking'];
+  aggregate_ranking?: CouncilMetadata['aggregateRanking'];
+}
+
+interface Stage2Shape {
+  parsedRanking?: string[];
+  parsed_ranking?: string[];
+}
 
 /**
  * Reconstruct metadata from stored message data.
@@ -33,10 +40,9 @@ function reconstructMetadata(
   }
 
   // Extract aggregateRanking from stage3.aggregateRanking (handle both camelCase and snake_case)
+  const stage3 = message.stage3 as Stage3Shape;
   const aggregateRanking =
-    (message.stage3 as any).aggregateRanking ||
-    (message.stage3 as any).aggregate_ranking ||
-    [];
+    stage3.aggregateRanking || stage3.aggregate_ranking || [];
 
   // Reconstruct labelToModel from stage1 data
   // Labels are typically "Response A", "Response B", etc.
@@ -55,11 +61,14 @@ function reconstructMetadata(
 /**
  * Normalize stage2 data to ensure parsedRanking is available (handle both camelCase and snake_case).
  */
-function normalizeStage2Data(stage2: any[] | null): any[] | null {
+function normalizeStage2Data(stage2: AssistantMessage['stage2']): AssistantMessage['stage2'] {
   if (!stage2) return null;
   return stage2.map(ranking => ({
     ...ranking,
-    parsedRanking: ranking.parsedRanking || ranking.parsed_ranking || [],
+    parsedRanking:
+      (ranking as Stage2Shape).parsedRanking ||
+      (ranking as Stage2Shape).parsed_ranking ||
+      [],
   }));
 }
 
@@ -96,22 +105,58 @@ function enrichMessagesWithMetadata(messages: Message[]): Message[] {
   });
 }
 
+function mergeConversationMessages(
+  serverMessages: Message[],
+  streamState: ReturnType<typeof selectConversationStreamState>
+): Message[] {
+  const merged = [...serverMessages];
+  const { optimisticUserMessage, assistantDraft, status } = streamState;
+
+  if (!optimisticUserMessage || !assistantDraft) {
+    return merged;
+  }
+
+  const lastServerMessage = merged[merged.length - 1];
+  const hasUserAtTail =
+    lastServerMessage?.role === 'user' &&
+    lastServerMessage.content === optimisticUserMessage.content;
+
+  if (!hasUserAtTail) {
+    merged.push(optimisticUserMessage);
+  }
+
+  const serverHasFinalAssistant =
+    assistantDraft.stage3?.response &&
+    merged.some(
+      msg =>
+        msg.role === 'assistant' &&
+        (msg as AssistantMessage).stage3?.response === assistantDraft.stage3?.response
+    );
+
+  if ((status === 'streaming' || status === 'syncing') && !serverHasFinalAssistant) {
+    merged.push(assistantDraft);
+  }
+
+  return merged;
+}
+
 export default function ChatPage() {
   const params = useParams();
   const conversationId = params.id as string;
   const dispatch = useAppDispatch();
-  const token = useAppSelector(state => state.auth.accessToken);
+  const store = useAppStore();
+  const streamState = useAppSelector(state =>
+    selectConversationStreamState(state, conversationId)
+  );
 
   const {
     data: conversation,
     isLoading,
-    refetch,
   } = useGetConversationQuery(conversationId);
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const [rateLimitErrors, setRateLimitErrors] = useState<Record<string, string>>(
+    {}
+  );
 
   const contactEmail =
     process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'heeranshconnect@gmail.com';
@@ -121,260 +166,55 @@ export default function ChatPage() {
     dispatch(setCurrentConversationId(conversationId));
   }, [conversationId, dispatch]);
 
-  // Sync messages with fetched conversation and enrich with metadata
-  useEffect(() => {
-    if (conversation?.messages) {
-      const enrichedMessages = enrichMessagesWithMetadata(
-        conversation.messages
-      );
-      setMessages(enrichedMessages);
-    }
-  }, [conversation]);
-
-  const sendMessageStream = useCallback(
-    async (content: string) => {
-      setIsStreaming(true);
-      setRateLimitError(null);
-
-      // Optimistically add user message
-      const userMessage: Message = { role: 'user', content };
-      setMessages(prev => [...prev, userMessage]);
-
-      // Create initial assistant message
-      const assistantMessage: AssistantMessage = {
-        role: 'assistant',
-        stage1: null,
-        stage2: null,
-        stage3: null,
-        metadata: null,
-        loading: {
-          stage1: false,
-          stage2: false,
-          stage3: false,
-        },
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-
-      let requestSucceeded = false;
-      try {
-        abortControllerRef.current = new AbortController();
-
-        const response = await streamConversationMessage({
-          conversationId,
-          content,
-          token,
-          signal: abortControllerRef.current.signal,
-        });
-
-        if (!response.ok) {
-          // Check for rate limit error
-          if (response.status === 429) {
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage =
-              errorData.detail ||
-              'Rate limit exceeded. Please try again later.';
-            setRateLimitError(errorMessage);
-            // Remove optimistic messages
-            setMessages(prev => prev.slice(0, -2));
-            setIsStreaming(false);
-            return;
-          }
-          throw new Error('Failed to send message');
-        }
-
-        // Response is OK, which means rate limit check passed and count was incremented
-        requestSucceeded = true;
-
-        const reader = response.body?.getReader();
-        if (!reader) throw new Error('No response body');
-
-        const decoder = new TextDecoder();
-        let buffer = ''; // Buffer to handle partial SSE lines across chunks
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          // Append new chunk to buffer
-          buffer += decoder.decode(value, { stream: true });
-
-          // Split by newlines but keep track of incomplete lines
-          const lines = buffer.split('\n');
-
-          // The last element might be incomplete (no trailing newline)
-          // Keep it in the buffer for the next iteration
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              try {
-                const event: StreamEvent = JSON.parse(data);
-                handleStreamEvent(event);
-              } catch {
-                console.error('Failed to parse SSE event:', data);
-              }
-            }
-          }
-        }
-
-        // Process any remaining data in buffer after stream ends
-        if (buffer.startsWith('data: ')) {
-          const data = buffer.slice(6);
-          try {
-            const event: StreamEvent = JSON.parse(data);
-            handleStreamEvent(event);
-          } catch {
-            // Ignore incomplete final event
-          }
-        }
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          console.error('Stream error:', error);
-          // Remove optimistic messages on error
-          setMessages(prev => prev.slice(0, -2));
-        }
-      } finally {
-        setIsStreaming(false);
-        abortControllerRef.current = null;
-        // Refetch to sync with server
-        refetch();
-        // Invalidate user data to update rate limit banner
-        // Only invalidate if request succeeded (response was OK), meaning the count was incremented
-        if (requestSucceeded) {
-          dispatch(userApi.util.invalidateTags(['User']));
-        }
-      }
-    },
-    [conversationId, refetch, token]
+  const serverMessages = useMemo(
+    () =>
+      conversation?.messages
+        ? enrichMessagesWithMetadata(conversation.messages)
+        : [],
+    [conversation]
   );
 
-  const handleStreamEvent = (event: StreamEvent) => {
-    setMessages(prev => {
-      const messages = [...prev];
-      const lastMsgIndex = messages.length - 1;
-      const lastMsg = messages[lastMsgIndex] as AssistantMessage;
+  const messages = useMemo(
+    () => mergeConversationMessages(serverMessages, streamState),
+    [serverMessages, streamState]
+  );
 
-      // Create a deep copy of the last message to ensure immutability
-      // This is critical for React StrictMode which calls updaters twice
-      const updatedMsg: AssistantMessage = {
-        ...lastMsg,
-        loading: lastMsg.loading ? { ...lastMsg.loading } : undefined,
-        streaming: lastMsg.streaming
-          ? {
-              ...lastMsg.streaming,
-              stage1Models: lastMsg.streaming.stage1Models
-                ? { ...lastMsg.streaming.stage1Models }
-                : undefined,
-              stage2Models: lastMsg.streaming.stage2Models
-                ? { ...lastMsg.streaming.stage2Models }
-                : undefined,
-            }
-          : undefined,
-      };
+  useEffect(() => {
+    if (streamState.status !== 'syncing' || !streamState.assistantDraft?.stage3) {
+      return;
+    }
 
-      switch (event.type) {
-        case 'stage1Start':
-          updatedMsg.loading = { ...updatedMsg.loading!, stage1: true };
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage1Models: {},
-          };
-          break;
+    const finalResponse = streamState.assistantDraft.stage3.response;
+    const serverHasFinalAssistant = serverMessages.some(
+      msg =>
+        msg.role === 'assistant' &&
+        (msg as AssistantMessage).stage3?.response === finalResponse
+    );
 
-        case 'stage1Token': {
-          const modelId = event.model!;
-          const currentModels = updatedMsg.streaming?.stage1Models || {};
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage1Models: {
-              ...currentModels,
-              [modelId]: (currentModels[modelId] || '') + event.token,
-            },
-          };
-          break;
-        }
+    if (serverHasFinalAssistant) {
+      dispatch(clearConversationStreamDraft({ conversationId }));
+    }
+  }, [conversationId, dispatch, serverMessages, streamState]);
 
-        case 'stage1Complete':
-          updatedMsg.stage1 = event.data as AssistantMessage['stage1'];
-          updatedMsg.loading = { ...updatedMsg.loading!, stage1: false };
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage1Models: undefined,
-          };
-          break;
-
-        case 'stage2Start':
-          updatedMsg.loading = { ...updatedMsg.loading!, stage2: true };
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage2Models: {},
-          };
-          break;
-
-        case 'stage2Token': {
-          const modelId = event.model!;
-          const currentModels = updatedMsg.streaming?.stage2Models || {};
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage2Models: {
-              ...currentModels,
-              [modelId]: (currentModels[modelId] || '') + event.token,
-            },
-          };
-          break;
-        }
-
-        case 'stage2Complete':
-          updatedMsg.stage2 = event.data as AssistantMessage['stage2'];
-          updatedMsg.metadata = event.metadata as CouncilMetadata;
-          updatedMsg.loading = { ...updatedMsg.loading!, stage2: false };
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage2Models: undefined,
-          };
-          break;
-
-        case 'stage3Start':
-          updatedMsg.loading = { ...updatedMsg.loading!, stage3: true };
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage3Text: '',
-          };
-          break;
-
-        case 'stage3Token': {
-          const currentText = updatedMsg.streaming?.stage3Text || '';
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage3Text: currentText + event.token,
-          };
-          break;
-        }
-
-        case 'stage3Complete':
-          updatedMsg.stage3 = event.data as AssistantMessage['stage3'];
-          updatedMsg.loading = { ...updatedMsg.loading!, stage3: false };
-          updatedMsg.streaming = {
-            ...updatedMsg.streaming,
-            stage3Text: undefined,
-          };
-          break;
-
-        case 'error':
-          console.error('Stream error:', event.message);
-          break;
-      }
-
-      messages[lastMsgIndex] = updatedMsg;
-      return messages;
+  const handleSendMessage = (content: string) => {
+    if (!content.trim() || streamState.status === 'streaming') return;
+    setRateLimitErrors(prev => {
+      const next = { ...prev };
+      delete next[conversationId];
+      return next;
+    });
+    void startConversationStreamRequest({
+      dispatch,
+      getState: store.getState,
+      conversationId,
+      content: content.trim(),
+      onRateLimitError: message =>
+        setRateLimitErrors(prev => ({ ...prev, [conversationId]: message })),
     });
   };
 
-  const handleSendMessage = (content: string) => {
-    if (!content.trim() || isStreaming) return;
-    sendMessageStream(content.trim());
-  };
+  const isStreaming = streamState.status === 'streaming';
+  const rateLimitError = rateLimitErrors[conversationId] ?? null;
 
   if (isLoading) {
     return (

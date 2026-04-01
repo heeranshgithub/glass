@@ -13,3 +13,12 @@ export {
   initializeUI,
   setCurrentConversationId,
 } from './uiSlice';
+export {
+  default as chatStreamReducer,
+  startConversationStream,
+  applyStreamEvent,
+  markStreamSyncing,
+  failConversationStream,
+  clearConversationStreamDraft,
+  selectConversationStreamState,
+} from './chatStreamSlice';

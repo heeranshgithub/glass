@@ -24,6 +24,7 @@ from app.config import DEMO_EMAIL
 from services.rate_limit_service import RateLimitService
 
 router = APIRouter()
+DEMO_DAILY_REQUEST_LIMIT = 3
 
 async def get_user_openrouter_key(user_id: str, db: AsyncIOMotorDatabase) -> Optional[str]:
     """
@@ -90,6 +91,39 @@ async def get_current_user_profile(
             detail="User not found"
         )
     
+    is_demo_user = bool(DEMO_EMAIL) and user_doc.get("email") == DEMO_EMAIL
+    if is_demo_user:
+        now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        last_request_date = user_doc.get("last_request_date")
+
+        reset_daily_limit = False
+        if last_request_date is None:
+            reset_daily_limit = True
+        elif isinstance(last_request_date, datetime):
+            if last_request_date.tzinfo is None:
+                last_request_date = last_request_date.replace(tzinfo=timezone.utc)
+            reset_daily_limit = last_request_date < today_start
+        else:
+            reset_daily_limit = True
+
+        if reset_daily_limit and (
+            user_doc.get("daily_request_limit") != DEMO_DAILY_REQUEST_LIMIT
+            or user_doc.get("daily_request_count", 0) != 0
+        ):
+            await users.update_one(
+                {"_id": user_doc["_id"]},
+                {
+                    "$set": {
+                        "daily_request_limit": DEMO_DAILY_REQUEST_LIMIT,
+                        "daily_request_count": 0,
+                        "updated_at": now,
+                    }
+                },
+            )
+            user_doc["daily_request_limit"] = DEMO_DAILY_REQUEST_LIMIT
+            user_doc["daily_request_count"] = 0
+
     return _user_doc_to_response(user_doc)
 
 
@@ -444,7 +478,9 @@ async def reset_demo_user_limit(
     
     # Reset the limit using rate limit service
     rate_limit_service = RateLimitService(db)
-    success = await rate_limit_service.reset_user_limit(str(demo_user["_id"]))
+    success = await rate_limit_service.reset_user_limit(
+        str(demo_user["_id"]), daily_limit=DEMO_DAILY_REQUEST_LIMIT
+    )
     
     if not success:
         raise HTTPException(

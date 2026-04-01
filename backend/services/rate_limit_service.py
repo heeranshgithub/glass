@@ -140,24 +140,29 @@ class RateLimitService:
         except Exception:
             return 0, None
     
-    async def reset_user_limit(self, user_id: str) -> bool:
+    async def reset_user_limit(self, user_id: str, daily_limit: Optional[int] = None) -> bool:
         """
         Reset a user's daily request count to 0.
         
         Args:
             user_id: User ID
+            daily_limit: Optional daily limit to set during reset
             
         Returns:
             True if successful, False otherwise
         """
         try:
+            update_data = {
+                "daily_request_count": 0,
+                "updated_at": datetime.now(timezone.utc)
+            }
+            if daily_limit is not None:
+                update_data["daily_request_limit"] = daily_limit
+
             result = await self.users.update_one(
                 {"_id": ObjectId(user_id)},
                 {
-                    "$set": {
-                        "daily_request_count": 0,
-                        "updated_at": datetime.now(timezone.utc)
-                    }
+                    "$set": update_data
                 }
             )
             return result.modified_count > 0

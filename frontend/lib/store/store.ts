@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { baseApi } from './api/baseApi';
-import { authReducer, uiReducer } from './slices';
+import { authReducer, chatStreamReducer, uiReducer } from './slices';
 
 export const makeStore = () => {
   const store = configureStore({
@@ -9,6 +9,7 @@ export const makeStore = () => {
       [baseApi.reducerPath]: baseApi.reducer,
       auth: authReducer,
       ui: uiReducer,
+      chatStream: chatStreamReducer,
     },
     middleware: getDefaultMiddleware =>
       getDefaultMiddleware().concat(baseApi.middleware),
