@@ -9,7 +9,14 @@ import { setTokens } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Check, X } from 'lucide-react';
+import {
+  ArrowRight,
+  Loader2,
+  Check,
+  X,
+  Sparkles,
+  UserPlus,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
@@ -76,57 +83,73 @@ export default function RegisterPage() {
     <div className="space-y-8">
       <div className="lg:hidden flex items-baseline gap-2">
         <span className="text-2xl font-bold tracking-tighter">Glass</span>
-        <span className="mono-label">/ Council</span>
       </div>
 
-      <div className="space-y-3">
-        <span className="mono-label">New / Create account</span>
-        <h2 className="display-md leading-none">
-          Join the
-          <br />
-          council<span className="text-primary">.</span>
-        </h2>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background/80 px-3 py-1 text-xs font-medium text-foreground/80">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Early access workspace
+          </div>
+          <h2 className="display-md leading-none pt-4">
+            Join the
+            <br />
+            council<span className="text-primary">.</span>
+          </h2>
+          <p className="pt-3 text-sm text-muted-foreground">
+            Create your profile and start orchestrating multi-model responses in
+            minutes.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 rounded-2xl border border-border/70 bg-card/70 p-5 shadow-sm"
+      >
         {error && (
           <div
-            className="border-l-2 border-destructive pl-3 py-1 text-sm text-destructive"
+            className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
             role="alert"
           >
             {error}
           </div>
         )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor="fullName" className="mono-label">
-            Full name
-          </Label>
-          <Input
-            id="fullName"
-            name="fullName"
-            type="text"
-            placeholder="John Doe"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="email" className="mono-label">
-            Email
-          </Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="you@example.com"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            autoComplete="email"
-          />
+        <div className="space-y-3 rounded-xl border border-border/60 bg-background/60 p-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <UserPlus className="h-3.5 w-3.5" />
+            Profile basics
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="fullName" className="mono-label">
+              Full name
+            </Label>
+            <Input
+              id="fullName"
+              name="fullName"
+              type="text"
+              placeholder="John Doe"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="mono-label">
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              autoComplete="email"
+            />
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -144,7 +167,7 @@ export default function RegisterPage() {
             autoComplete="new-password"
           />
           {formData.password && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-border/60 bg-muted/30 p-3 pt-2">
               {passwordRequirements.map((req, i) => (
                 <div
                   key={i}
@@ -188,14 +211,22 @@ export default function RegisterPage() {
             )}
         </div>
 
-        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full group transition-all"
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
               Creating account
             </>
           ) : (
-            'Create account'
+            <>
+              Create account
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </>
           )}
         </Button>
 

@@ -9,7 +9,7 @@ import { setTokens } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,28 +41,36 @@ export default function LoginPage() {
       {/* Mobile mark */}
       <div className="lg:hidden flex items-baseline gap-2">
         <span className="text-2xl font-bold tracking-tighter">Glass</span>
-        <span className="mono-label">/ Council</span>
       </div>
 
-      <div className="space-y-3">
-        <span className="mono-label">01 / Sign in</span>
-        <h2 className="display-md leading-none">
-          Welcome
-          <br />
-          back<span className="text-primary">.</span>
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Enter your credentials to access the council.
-        </p>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background/80 px-3 py-1 text-xs font-medium text-foreground/80">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Consensus mode enabled
+          </div>
+          <h2 className="display-md leading-none pt-4">
+            Welcome
+            <br />
+            back<span className="text-primary">.</span>
+          </h2>
+          <p className="pt-3 text-sm text-muted-foreground">
+            Sign in to continue routing prompts through your model council.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 rounded-2xl border border-border/70 bg-card/70 p-5 shadow-sm"
+      >
         {error && (
           <div
-            className="border-l-2 border-destructive pl-3 py-1 text-sm text-destructive"
+            className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
             role="alert"
           >
-            {error}
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
@@ -99,7 +107,7 @@ export default function LoginPage() {
         <Button
           type="submit"
           size="lg"
-          className="w-full"
+          className="w-full group transition-all"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -108,7 +116,10 @@ export default function LoginPage() {
               Signing in
             </>
           ) : (
-            'Sign in'
+            <>
+              Sign in
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </>
           )}
         </Button>
 

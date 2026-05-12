@@ -6,6 +6,7 @@ import {
   useCreateConversationMutation,
   setCurrentConversationId,
   useGetCouncilHealthQuery,
+  useGetCurrentUserQuery,
 } from '@/lib/store';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
@@ -16,6 +17,8 @@ export default function HomePage() {
     useCreateConversationMutation();
   const { data: health, isLoading: isLoadingHealth } =
     useGetCouncilHealthQuery();
+  const { data: user, isLoading: isLoadingUser } = useGetCurrentUserQuery();
+  const isDemo = user?.isDemo === true;
 
   const handleNewConversation = async () => {
     try {
@@ -54,11 +57,7 @@ export default function HomePage() {
           style={{ animationDelay: '0ms' }}
         >
           <div className="lg:col-span-8">
-            <h1 className="display-xl leading-[0.9]">
-              Multi-model
-              <br />
-              consensus<span className="text-primary">.</span>
-            </h1>
+            <h1 className="display-xl leading-[0.9]">Multi-model consensus</h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground max-w-2xl font-light">
               Harness the collective intelligence of multiple AI models through
               a rigorous three-stage evaluation process.
@@ -144,9 +143,9 @@ export default function HomePage() {
                 ></span>
               </div>
               <span className="text-sm font-medium">
-                {isLoadingHealth
+                {isLoadingHealth || isLoadingUser
                   ? 'Checking...'
-                  : health?.openrouterConfigured
+                  : health?.openrouterConfigured || isDemo
                     ? 'All systems operational'
                     : 'OpenRouter not configured'}
               </span>

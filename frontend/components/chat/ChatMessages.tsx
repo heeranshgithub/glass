@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { Stage1Display } from './Stage1Display';
 import { Stage2Display } from './Stage2Display';
 import { Stage3Display } from './Stage3Display';
-import { Loader2 } from 'lucide-react';
+import { ArrowDown, Layers, ListOrdered, Loader2, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Message, AssistantMessage } from '@/lib/types';
 
@@ -16,57 +16,120 @@ interface ChatMessagesProps {
 /** Shared chat column: full width of main, slight edge gutter */
 const chatColumn = 'w-full px-3 sm:px-4';
 
+const EMPTY_STAGES = [
+  {
+    n: '01',
+    title: 'Responses',
+    body: 'Each model in the council answers independently.',
+    Icon: MessageSquare,
+  },
+  {
+    n: '02',
+    title: 'Rankings',
+    body: "Peers rank each other's work, anonymously.",
+    Icon: ListOrdered,
+  },
+  {
+    n: '03',
+    title: 'Synthesis',
+    body: 'The arbiter resolves the field into one answer.',
+    Icon: Layers,
+  },
+] as const;
+
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   if (messages.length === 0) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className={`${chatColumn} pt-6 pb-4 sm:pt-8`}>
-          <div className="space-y-6">
-            <div>
-              <span className="mono-label">Glass / Council</span>
-              <div className="swiss-rule mt-2" />
+        <div className={`${chatColumn} pt-6 pb-6 sm:pt-10 sm:pb-8 max-w-4xl`}>
+          <div className="space-y-10 sm:space-y-12">
+            <div className="space-y-6">
+              <p
+                className="mono-label animate-fade-up"
+                style={{ animationDelay: '0ms' }}
+              >
+                Empty thread
+              </p>
+              <h1 className="display-lg max-w-[min(100%,36rem)] leading-[0.98]">
+                <span
+                  className="block animate-fade-up"
+                  style={{ animationDelay: '40ms' }}
+                >
+                  Three stages.
+                </span>
+                <span
+                  className="block text-muted-foreground animate-fade-up"
+                  style={{ animationDelay: '90ms' }}
+                >
+                  Many minds.
+                </span>
+                <span
+                  className="block animate-fade-up"
+                  style={{ animationDelay: '140ms' }}
+                >
+                  One answer
+                  <span className="text-primary">.</span>
+                </span>
+              </h1>
+              <div
+                className="swiss-rule max-w-md animate-fade-up"
+                style={{ animationDelay: '180ms' }}
+              />
             </div>
 
-            <h1 className="display-lg max-w-2xl">
-              Three stages.
-              <br />
-              <span className="text-muted-foreground">Many minds.</span>
-              <br />
-              One answer<span className="text-primary">.</span>
-            </h1>
+            <div
+              className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-8 sm:gap-y-10"
+              style={{ animationDelay: '200ms' }}
+            >
+              {EMPTY_STAGES.map((s, i) => {
+                const Icon = s.Icon;
+                return (
+                  <article
+                    key={s.n}
+                    className="group relative animate-fade-up"
+                    style={{ animationDelay: `${220 + i * 60}ms` }}
+                  >
+                    <div className="absolute top-0 left-0 right-0 h-px bg-border transition-colors duration-500 group-hover:bg-foreground" />
+                    <div className="absolute top-0 left-0 h-px w-0 bg-primary transition-all duration-700 ease-out group-hover:w-full" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-5 max-w-2xl">
-              {[
-                {
-                  n: '01',
-                  title: 'Responses',
-                  body: 'Each model in the council answers independently.',
-                },
-                {
-                  n: '02',
-                  title: 'Rankings',
-                  body: 'Peers rank each other&rsquo;s work, anonymously.',
-                },
-                {
-                  n: '03',
-                  title: 'Synthesis',
-                  body: 'The arbiter resolves the field into one answer.',
-                },
-              ].map(s => (
-                <div key={s.n} className="space-y-2">
-                  <span className="mono-label">{s.n}</span>
-                  <h3 className="text-base font-semibold">{s.title}</h3>
-                  <p
-                    className="text-sm text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: s.body }}
-                  />
-                </div>
-              ))}
+                    <div className="pt-6 space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="text-3xl font-light tabular-nums text-muted-foreground transition-colors duration-500 group-hover:text-foreground">
+                          {s.n}
+                        </span>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-border text-muted-foreground transition-colors duration-300 group-hover:border-foreground group-hover:text-foreground">
+                          <Icon className="h-4 w-4" strokeWidth={1.75} />
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold tracking-tight transition-colors duration-500 group-hover:text-primary">
+                          {s.title}
+                        </h3>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                          {s.body}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
 
-            <p className="text-base text-muted-foreground max-w-lg leading-relaxed">
-              Start by asking a question below.
-            </p>
+            <div
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-l-2 border-primary pl-4 py-1 animate-fade-up"
+              style={{ animationDelay: '420ms' }}
+            >
+              <ArrowDown
+                className="h-4 w-4 shrink-0 text-primary"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <span className="mono-label text-foreground mr-2">Input</span>
+                Type your question in the field below—the council runs all
+                three stages automatically.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -106,7 +169,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
 
 function UserMessage({ content }: { content: string }) {
   return (
-    <div className="flex flex-col items-end gap-2"> 
+    <div className="flex flex-col items-end gap-2">
       <div
         className={cn(
           'w-fit max-w-[min(100%,42rem)] rounded-2xl border border-border',

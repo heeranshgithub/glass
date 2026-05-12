@@ -107,7 +107,6 @@ export default function LeaderboardPage() {
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 lg:py-10">
         {/* Header */}
         <div className="flex items-baseline justify-between mb-4">
-          <span className="mono-label">Glass / Scoreboard</span>
           <button
             onClick={() => refetch()}
             disabled={isFetching}
@@ -128,11 +127,7 @@ export default function LeaderboardPage() {
 
         <div className="grid grid-cols-12 gap-5 lg:gap-6 mb-8">
           <div className="col-span-12 lg:col-span-8">
-            <h1 className="display-lg leading-none">
-              Model
-              <br />
-              scoreboard<span className="text-primary">.</span>
-            </h1>
+            <h1 className="display-lg leading-none">Model Scoreboard</h1>
           </div>
           <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end">
             <p className="text-sm text-muted-foreground leading-relaxed">

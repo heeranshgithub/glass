@@ -25,24 +25,41 @@ function SectionHeader({
   title,
   description,
 }: {
-  number: string;
+  number?: string;
   title: string;
   description?: string;
 }) {
+  const titleBlock = (
+    <div>
+      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+      {description && (
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
+
+  if (number == null) {
+    return <header>{titleBlock}</header>;
+  }
+
   return (
     <header className="grid grid-cols-[2.5rem_1fr] gap-3 items-baseline">
       <span className="mono-label tabular-nums">{number}</span>
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        {description && (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        )}
-      </div>
+      {titleBlock}
     </header>
   );
 }
 
-function SectionBody({ children }: { children: React.ReactNode }) {
+function SectionBody({
+  children,
+  numbered = true,
+}: {
+  children: React.ReactNode;
+  numbered?: boolean;
+}) {
+  if (!numbered) {
+    return <div className="space-y-4 max-w-xl">{children}</div>;
+  }
   return (
     <div className="grid grid-cols-[2.5rem_1fr] gap-3">
       <div />
@@ -206,18 +223,15 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 overflow-auto">
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 lg:py-10">
+      <div className="max-w-4xl mx-auto px-2 sm:px-3 py-6 lg:py-10">
         <div className="flex items-baseline justify-between mb-4">
-          <span className="mono-label">Glass / Settings</span>
           <span className="mono-label">{user?.email}</span>
         </div>
         <div className="swiss-rule-strong mb-8" />
 
         <div className="grid grid-cols-12 gap-5 lg:gap-6 mb-8 lg:mb-10">
           <div className="col-span-12 lg:col-span-8">
-            <h1 className="display-lg leading-none">
-              Settings<span className="text-primary">.</span>
-            </h1>
+            <h1 className="display-lg leading-none">Settings</h1>
           </div>
           <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end">
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -239,12 +253,11 @@ export default function SettingsPage() {
           {/* Profile */}
           <section className="space-y-4">
             <SectionHeader
-              number={nextNumber()}
               title="Profile"
               description="Your personal information."
             />
             <div className="swiss-rule" />
-            <SectionBody>
+            <SectionBody numbered={false}>
               <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="email" className="mono-label">
@@ -310,9 +323,6 @@ export default function SettingsPage() {
                         })
                       : 'unknown'}
                   </span>
-                  {user?.roles && user.roles.length > 0 && (
-                    <span>Roles · {user.roles.join(', ')}</span>
-                  )}
                 </div>
 
                 {!isDemo && (
@@ -341,12 +351,11 @@ export default function SettingsPage() {
           {/* Appearance */}
           <section className="space-y-4">
             <SectionHeader
-              number={nextNumber()}
               title="Appearance"
               description="How Glass looks on your device."
             />
             <div className="swiss-rule" />
-            <SectionBody>
+            <SectionBody numbered={false}>
               <div className="grid grid-cols-3 gap-3">
                 {themes.map(({ value, label, icon: Icon }) => (
                   <button
@@ -461,7 +470,7 @@ export default function SettingsPage() {
               />
               <div className="swiss-rule" />
               <SectionBody>
-                {user?.hasOpenRouterKey ? (
+                {user?.hasOpenRouterKey || isDemo ? (
                   <p className="mono-label flex items-center gap-2">
                     <span className="h-1.5 w-1.5 bg-foreground" />
                     Configured
@@ -541,8 +550,7 @@ export default function SettingsPage() {
                               await removeOpenRouterKey().unwrap();
                             } catch (err: any) {
                               setError(
-                                err?.data?.detail ||
-                                  'Failed to remove API key.'
+                                err?.data?.detail || 'Failed to remove API key.'
                               );
                             }
                           }

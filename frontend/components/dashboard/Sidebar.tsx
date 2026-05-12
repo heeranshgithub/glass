@@ -114,7 +114,7 @@ export function Sidebar() {
                 <span className="text-2xl font-bold tracking-tighter leading-none">
                   Glass
                 </span>
-                <span className="mono-label leading-none">/ Council</span>
+                <span className="mono-label leading-none">Glass</span>
               </button>
               <button
                 onClick={() => dispatch(toggleSidebar())}
