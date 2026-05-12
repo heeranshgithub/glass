@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   useAppDispatch,
@@ -121,14 +121,12 @@ export default function ChatPage() {
     dispatch(setCurrentConversationId(conversationId));
   }, [conversationId, dispatch]);
 
-  // Sync messages with fetched conversation and enrich with metadata
-  useEffect(() => {
-    if (conversation?.messages) {
-      const enrichedMessages = enrichMessagesWithMetadata(
-        conversation.messages
-      );
-      setMessages(enrichedMessages);
-    }
+  // Sync messages with fetched conversation before paint so cached conversations
+  // never flash the empty-thread UI while local state is still [].
+  useLayoutEffect(() => {
+    if (!conversation) return;
+    const raw = conversation.messages ?? [];
+    setMessages(enrichMessagesWithMetadata(raw));
   }, [conversation]);
 
   const sendMessageStream = useCallback(
