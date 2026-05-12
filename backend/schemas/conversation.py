@@ -51,7 +51,7 @@ class ModelRankingSchema(CamelSchema):
                 "model": "openai/gpt-4o",
                 "ranking": "Response A > Response B",
                 # Ordered model names (best -> worst)
-                "parsedRanking": ["openai/gpt-5.1", "google/gemini-3-pro-preview", "anthropic/claude-sonnet-4.5", "x-ai/grok-4"]
+                "parsedRanking": ["openai/gpt-5.1", "google/gemini-3.1-pro-preview", "anthropic/claude-sonnet-4.5", "x-ai/grok-4.20"]
             }
         }
     )
@@ -111,15 +111,15 @@ class CouncilResponse(CamelSchema):
             "example": {
                 "stage1": [
                     {"model": "openai/gpt-5.1", "response": "Python is..."},
-                    {"model": "google/gemini-3-pro-preview", "response": "Python is..."},
+                    {"model": "google/gemini-3.1-pro-preview", "response": "Python is..."},
                     {"model": "anthropic/claude-sonnet-4.5", "response": "Python is..."},
-                    {"model": "x-ai/grok-4", "response": "Python is..."}
+                    {"model": "x-ai/grok-4.20", "response": "Python is..."}
                 ],
                 "stage2": [
                     {"model": "openai/gpt-5.1", "ranking": "...", "parsedRanking": ["openai/gpt-5.1"]},
-                    {"model": "google/gemini-3-pro-preview", "ranking": "...", "parsedRanking": ["google/gemini-3-pro-preview"]},
+                    {"model": "google/gemini-3.1-pro-preview", "ranking": "...", "parsedRanking": ["google/gemini-3.1-pro-preview"]},
                     {"model": "anthropic/claude-sonnet-4.5", "ranking": "...", "parsedRanking": ["anthropic/claude-sonnet-4.5"]},
-                    {"model": "x-ai/grok-4", "ranking": "...", "parsedRanking": ["x-ai/grok-4"]}
+                    {"model": "x-ai/grok-4.20", "ranking": "...", "parsedRanking": ["x-ai/grok-4.20"]}
                 ],
                 "stage3": {
                     "model": "google/gemini-pro",

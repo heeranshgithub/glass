@@ -4,14 +4,14 @@ stage1_results = [
         "response": "The answer is 42."
     },
     {
-        "model": "google/gemini-3-pro-preview",
+        "model": "google/gemini-3.1-pro-preview",
         "response": "The answer is 42."
     },
     {
         "model": "anthropic/claude-sonnet-4.5",
         "response": "The answer is 42."
     }, {
-        "model": "x-ai/grok-4",
+        "model": "x-ai/grok-4.20",
         "response": "The answer is 42."
     }
 ]
