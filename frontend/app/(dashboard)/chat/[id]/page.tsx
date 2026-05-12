@@ -392,7 +392,7 @@ export default function ChatPage() {
       <ChatMessages messages={messages} isLoading={isStreaming} />
       {rateLimitError && (
         <div className="border-t border-destructive bg-background">
-          <div className="w-full px-3 sm:px-4 py-2 flex items-start gap-2 text-sm">
+          <div className="w-full px-2.5 sm:px-3.5 py-2 flex items-start gap-2 text-sm">
             <AlertCircle
               className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5"
               strokeWidth={2}

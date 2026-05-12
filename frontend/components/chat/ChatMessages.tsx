@@ -14,7 +14,7 @@ interface ChatMessagesProps {
 }
 
 /** Shared chat column: full width of main, slight edge gutter */
-const chatColumn = 'w-full px-3 sm:px-4';
+const chatColumn = 'w-full px-2.5 sm:px-3.5';
 
 const EMPTY_STAGES = [
   {
