@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertCircle, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { UserProfileResponse } from '@/lib/types';
 
 interface RateLimitBannerProps {
@@ -8,53 +9,69 @@ interface RateLimitBannerProps {
 }
 
 export function RateLimitBanner({ user }: RateLimitBannerProps) {
-  // Only show for demo users (isDemo === true)
-  if (user.isDemo !== true) {
+  if (user.isDemo !== true) return null;
+  if (user.dailyRequestLimit === null || user.dailyRequestLimit === undefined)
     return null;
-  }
-
-  // If no limit is set, don't show banner
-  if (user.dailyRequestLimit === null || user.dailyRequestLimit === undefined) {
-    return null;
-  }
 
   const remaining = user.dailyRequestLimit - (user.dailyRequestCount || 0);
   const isExhausted = remaining <= 0;
   const isLow = remaining <= 1 && remaining > 0;
 
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'heeranshconnect@gmail.com';
+  const contactEmail =
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'heeranshconnect@gmail.com';
 
   return (
     <div
-      className={`w-full px-4 py-3 flex items-center justify-center gap-2 text-sm ${
+      className={cn(
+        'w-full border-b text-sm',
         isExhausted
-          ? 'bg-destructive/10 border-b border-destructive/20 text-destructive'
+          ? 'bg-background border-destructive text-destructive'
           : isLow
-          ? 'bg-yellow-500/10 border-b border-yellow-500/20 text-yellow-600 dark:text-yellow-400'
-          : 'bg-primary/10 border-b border-primary/20 text-primary'
-      }`}
+            ? 'bg-background border-foreground text-foreground'
+            : 'bg-background border-border text-foreground'
+      )}
     >
-      <AlertCircle className="h-4 w-4 flex-shrink-0" />
-      <span className="font-medium">
-        {isExhausted ? (
-          <>
-            Demo limit exhausted (0 requests remaining).{' '}
-            <a
-              href={`mailto:${contactEmail}`}
-              className="underline hover:opacity-80 inline-flex items-center gap-1"
-            >
-              <Mail className="h-3 w-3" />
-              Contact us at {contactEmail}
-            </a>{' '}
-            for more requests.
-          </>
-        ) : (
-          <>
-            Demo: {remaining} request{remaining !== 1 ? 's' : ''} remaining
-            today
-          </>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span
+            className={cn(
+              'mono-label',
+              isExhausted ? 'text-destructive' : 'text-foreground'
+            )}
+          >
+            Demo
+          </span>
+          <span
+            className={cn(
+              'h-1 w-1',
+              isExhausted
+                ? 'bg-destructive'
+                : isLow
+                  ? 'bg-primary'
+                  : 'bg-foreground'
+            )}
+          />
+          <span className="text-sm">
+            {isExhausted ? (
+              <>Daily limit exhausted</>
+            ) : (
+              <>
+                <span className="tabular-nums font-medium">{remaining}</span>{' '}
+                request{remaining !== 1 ? 's' : ''} remaining today
+              </>
+            )}
+          </span>
+        </div>
+        {isExhausted && (
+          <a
+            href={`mailto:${contactEmail}`}
+            className="inline-flex items-center gap-1.5 text-sm underline underline-offset-4 decoration-destructive/40 hover:decoration-destructive"
+          >
+            <Mail className="h-3 w-3" strokeWidth={1.75} />
+            Request more
+          </a>
         )}
-      </span>
+      </div>
     </div>
   );
 }

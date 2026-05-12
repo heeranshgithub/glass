@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSetOpenRouterKeyMutation } from '@/lib/store/api/userApi';
-import { Loader2, Key } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface OpenRouterKeyModalProps {
   open: boolean;
@@ -87,22 +87,27 @@ export function OpenRouterKeyModal({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent size="default" className="sm:max-w-md">
+      <AlertDialogContent
+        size="default"
+        className="sm:max-w-md"
+        style={{ borderRadius: 0 }}
+      >
         <AlertDialogHeader>
-          <div className="flex items-center justify-center mb-2">
-            <Key className="h-8 w-8 text-primary" />
-          </div>
-          <AlertDialogTitle>Add OpenRouter API Key</AlertDialogTitle>
-          <AlertDialogDescription>
-            To use the LLM Council features, you need to provide your OpenRouter
-            API key. Your key will be encrypted and stored securely. You can add
-            or update it later in settings.
+          <span className="mono-label">Required / OpenRouter</span>
+          <AlertDialogTitle className="text-2xl font-semibold tracking-tight">
+            Add your API key
+          </AlertDialogTitle>
+          <AlertDialogDescription className="leading-relaxed">
+            The council uses OpenRouter to call multiple models. Your key is
+            encrypted at rest and can be updated in settings.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="api-key">OpenRouter API Key</Label>
+        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="api-key" className="mono-label">
+              API key
+            </Label>
             <Input
               id="api-key"
               type="password"
@@ -115,21 +120,24 @@ export function OpenRouterKeyModal({
               disabled={isLoading}
               autoFocus
             />
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <p className="text-sm text-destructive pt-1">{error}</p>
+            )}
             <p className="text-xs text-muted-foreground">
-              Get your API key from{' '}
+              Get your key from{' '}
               <a
                 href="https://openrouter.ai/keys"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="text-foreground underline underline-offset-4 decoration-foreground/40 hover:decoration-foreground"
               >
                 openrouter.ai/keys
               </a>
+              .
             </p>
           </div>
 
-          <AlertDialogFooter>
+          <AlertDialogFooter className="gap-2">
             <Button
               type="button"
               variant="outline"
@@ -141,11 +149,11 @@ export function OpenRouterKeyModal({
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving
                 </>
               ) : (
-                'Save Key'
+                'Save key'
               )}
             </Button>
           </AlertDialogFooter>

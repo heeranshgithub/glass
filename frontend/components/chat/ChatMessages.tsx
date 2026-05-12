@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { Stage1Display } from './Stage1Display';
 import { Stage2Display } from './Stage2Display';
 import { Stage3Display } from './Stage3Display';
-import { User, Brain, Loader2, Sparkles, Hexagon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Message, AssistantMessage } from '@/lib/types';
 
@@ -13,48 +13,60 @@ interface ChatMessagesProps {
   isLoading: boolean;
 }
 
+/** Shared chat column: full width of main, slight edge gutter */
+const chatColumn = 'w-full px-3 sm:px-4';
+
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   if (messages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-radial">
-        <div className="text-center space-y-6 max-w-lg">
-          {/* Animated logo */}
-          <div className="relative mx-auto w-24 h-24">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-neon-purple/20 animate-pulse-glow" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Hexagon className="h-12 w-12 text-primary hexagon-logo" />
+      <div className="flex-1 overflow-y-auto">
+        <div className={`${chatColumn} pt-6 pb-4 sm:pt-8`}>
+          <div className="space-y-6">
+            <div>
+              <span className="mono-label">Glass / Council</span>
+              <div className="swiss-rule mt-2" />
             </div>
-            <div className="absolute -inset-4 rounded-3xl border border-primary/10 animate-pulse opacity-50" />
-          </div>
 
-          <div className="space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-                Start a Conversation
-              </span>
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Ask the{' '}
-              <span className="text-primary font-medium">LLM Council</span> a
-              question. Multiple AI models will analyze your query, rank each
-              other&apos;s responses, and synthesize the best answer.
-            </p>
-          </div>
+            <h1 className="display-lg max-w-2xl">
+              Three stages.
+              <br />
+              <span className="text-muted-foreground">Many minds.</span>
+              <br />
+              One answer<span className="text-primary">.</span>
+            </h1>
 
-          {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-2 pt-2">
-            {['Multi-Model Analysis', 'Peer Ranking', 'Synthesized Answer'].map(
-              (feature, i) => (
-                <div
-                  key={feature}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium glass border border-border/50 text-muted-foreground"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <Sparkles className="inline-block w-3 h-3 mr-1.5 text-primary" />
-                  {feature}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-5 max-w-2xl">
+              {[
+                {
+                  n: '01',
+                  title: 'Responses',
+                  body: 'Each model in the council answers independently.',
+                },
+                {
+                  n: '02',
+                  title: 'Rankings',
+                  body: 'Peers rank each other&rsquo;s work, anonymously.',
+                },
+                {
+                  n: '03',
+                  title: 'Synthesis',
+                  body: 'The arbiter resolves the field into one answer.',
+                },
+              ].map(s => (
+                <div key={s.n} className="space-y-2">
+                  <span className="mono-label">{s.n}</span>
+                  <h3 className="text-base font-semibold">{s.title}</h3>
+                  <p
+                    className="text-sm text-muted-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: s.body }}
+                  />
                 </div>
-              )
-            )}
+              ))}
+            </div>
+
+            <p className="text-base text-muted-foreground max-w-lg leading-relaxed">
+              Start by asking a question below.
+            </p>
           </div>
         </div>
       </div>
@@ -62,53 +74,29 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gradient-radial">
-      <div className="max-w-8xl mx-auto p-6 space-y-8">
+    <div className="flex-1 overflow-y-auto">
+      <div className={`${chatColumn} py-3 sm:py-4 space-y-6`}>
         {messages.map((message, index) => (
           <div
             key={index}
-            className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
-            style={{ animationDelay: `${index * 50}ms` }}
+            className="animate-fade-up"
+            style={{ animationDelay: `${Math.min(index, 5) * 40}ms` }}
           >
             {message.role === 'user' ? (
               <UserMessage content={message.content} />
             ) : (
-              <AssistantMessageDisplay message={message as AssistantMessage} />
+              <AssistantMessageDisplay
+                message={message as AssistantMessage}
+                withTopRule={index > 0}
+              />
             )}
           </div>
         ))}
 
         {isLoading && (
-          <div className="flex items-center gap-3 text-muted-foreground animate-in fade-in duration-300">
-            <div className="relative">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              <div className="absolute inset-0 animate-ping opacity-20">
-                <Loader2 className="h-5 w-5 text-primary" />
-              </div>
-            </div>
-            <span className="text-sm font-medium">
-              Consulting the council
-              <span className="inline-flex">
-                <span
-                  className="animate-bounce"
-                  style={{ animationDelay: '0ms' }}
-                >
-                  .
-                </span>
-                <span
-                  className="animate-bounce"
-                  style={{ animationDelay: '150ms' }}
-                >
-                  .
-                </span>
-                <span
-                  className="animate-bounce"
-                  style={{ animationDelay: '300ms' }}
-                >
-                  .
-                </span>
-              </span>
-            </span>
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span className="mono-label">Consulting the council</span>
           </div>
         )}
       </div>
@@ -118,47 +106,44 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
 
 function UserMessage({ content }: { content: string }) {
   return (
-    <div className="flex gap-4 group">
-      <div className="relative">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-neon-purple flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/20">
-          <User className="h-5 w-5 text-primary-foreground" />
-        </div>
-      </div>
-      <div className="flex-1 pt-1">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="font-semibold text-foreground">You</span>
-        </div>
-        <div className="glass rounded-2xl rounded-tl-sm p-4 border border-border/30">
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown>{content}</ReactMarkdown>
-          </div>
+    <div className="flex flex-col items-end gap-2"> 
+      <div
+        className={cn(
+          'w-fit max-w-[min(100%,42rem)] rounded-2xl border border-border',
+          'bg-muted px-3 py-2.5 shadow-sm',
+          'dark:border-border dark:bg-muted/80'
+        )}
+      >
+        <div className="prose prose-sm max-w-none dark:prose-invert text-foreground prose-p:my-1 prose-p:first:mt-0 prose-p:last:mb-0 text-left">
+          <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       </div>
     </div>
   );
 }
 
-function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
-  // Check if each stage is streaming (has streaming data but not complete data)
+function AssistantMessageDisplay({
+  message,
+  withTopRule = true,
+}: {
+  message: AssistantMessage;
+  withTopRule?: boolean;
+}) {
   const isStage1Streaming =
     !message.stage1 &&
-    message.streaming?.stage1Models &&
+    !!message.streaming?.stage1Models &&
     Object.keys(message.streaming.stage1Models).length > 0;
   const isStage2Streaming =
     !message.stage2 &&
-    message.streaming?.stage2Models &&
+    !!message.streaming?.stage2Models &&
     Object.keys(message.streaming.stage2Models).length > 0;
   const isStage3Streaming = !message.stage3 && !!message.streaming?.stage3Text;
 
-  // Convert streaming data to proper types for Stage components
   const stage1Data =
     message.stage1 ||
     (isStage1Streaming
       ? Object.entries(message.streaming!.stage1Models!).map(
-          ([model, response]) => ({
-            model,
-            response,
-          })
+          ([model, response]) => ({ model, response })
         )
       : null);
 
@@ -166,21 +151,14 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
     message.stage2 ||
     (isStage2Streaming
       ? Object.entries(message.streaming!.stage2Models!).map(
-          ([model, ranking]) => ({
-            model,
-            ranking,
-            parsedRanking: [], // Empty during streaming
-          })
+          ([model, ranking]) => ({ model, ranking, parsedRanking: [] })
         )
       : null);
 
   const stage3Data =
     message.stage3 ||
     (isStage3Streaming
-      ? {
-          model: '', // Will show "Unknown" until complete
-          response: message.streaming!.stage3Text!,
-        }
+      ? { model: '', response: message.streaming!.stage3Text! }
       : null);
 
   const hasContent = stage1Data || stage2Data || stage3Data;
@@ -190,29 +168,20 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
     message.loading?.stage3;
 
   return (
-    <div className="flex gap-4 group">
-      <div className="relative">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center flex-shrink-0 border border-border/50">
-          <Brain className="h-5 w-5 text-primary" />
-        </div>
-        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-neon-cyan border-2 border-background flex items-center justify-center">
-          <Sparkles className="w-2 h-2 text-background" />
-        </div>
+    <div
+      className={cn(
+        'space-y-4',
+        withTopRule && 'border-t border-border pt-4 mt-0.5'
+      )}
+    >
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="mono-label">Council</span>
+        <div className="swiss-rule flex-1 min-w-0 self-center" />
       </div>
-      <div className="flex-1 pt-1 space-y-4">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold bg-gradient-to-r from-primary to-neon-purple bg-clip-text text-transparent">
-            LLM Council
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-border/50 to-transparent" />
-        </div>
 
-        {/* Stage 1 */}
+      <div className="space-y-4">
         {message.loading?.stage1 && (
-          <LoadingStage
-            label="Stage 1: Collecting individual responses..."
-            stage={1}
-          />
+          <LoadingStage label="Collecting individual responses" stage={1} />
         )}
         {stage1Data && (
           <Stage1Display
@@ -221,9 +190,8 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
           />
         )}
 
-        {/* Stage 2 */}
         {message.loading?.stage2 && (
-          <LoadingStage label="Stage 2: Running peer rankings..." stage={2} />
+          <LoadingStage label="Running peer rankings" stage={2} />
         )}
         {stage2Data && (
           <Stage2Display
@@ -234,12 +202,8 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
           />
         )}
 
-        {/* Stage 3 */}
         {message.loading?.stage3 && (
-          <LoadingStage
-            label="Stage 3: Synthesizing final answer..."
-            stage={3}
-          />
+          <LoadingStage label="Synthesizing final answer" stage={3} />
         )}
         {stage3Data && (
           <Stage3Display
@@ -249,8 +213,8 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
         )}
 
         {!hasContent && !hasLoading && (
-          <div className="glass rounded-xl p-4 text-muted-foreground italic border border-border/30">
-            Waiting for response...
+          <div className="text-sm text-muted-foreground italic">
+            Waiting for response&hellip;
           </div>
         )}
       </div>
@@ -259,46 +223,17 @@ function AssistantMessageDisplay({ message }: { message: AssistantMessage }) {
 }
 
 function LoadingStage({ label, stage }: { label: string; stage: number }) {
-  const colors = {
-    1: 'from-chart-1/20 to-chart-1/5 border-chart-1/30',
-    2: 'from-chart-2/20 to-chart-2/5 border-chart-2/30',
-    3: 'from-chart-3/20 to-chart-3/5 border-chart-3/30',
-  };
-
-  const iconColors = {
-    1: 'text-chart-1',
-    2: 'text-chart-2',
-    3: 'text-chart-3',
-  };
-
   return (
-    <div
-      className={cn(
-        'flex items-center gap-4 p-4 rounded-xl border',
-        'bg-gradient-to-r',
-        colors[stage as keyof typeof colors]
-      )}
-    >
-      <div className="relative">
-        <Loader2
-          className={cn(
-            'h-5 w-5 animate-spin',
-            iconColors[stage as keyof typeof iconColors]
-          )}
-        />
-        <div className="absolute inset-0 animate-ping opacity-30">
-          <Loader2
-            className={cn(
-              'h-5 w-5',
-              iconColors[stage as keyof typeof iconColors]
-            )}
-          />
-        </div>
+    <div className="flex items-center gap-4">
+      <span className="mono-label tabular-nums">
+        {String(stage).padStart(2, '0')}
+      </span>
+      <div className="flex items-center gap-2 text-sm text-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <span>{label}</span>
+        <span className="animate-cursor text-muted-foreground">_</span>
       </div>
-      <span className="text-sm font-medium">{label}</span>
-      <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
-        <div className="h-full w-1/3 rounded-full animate-shimmer bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      </div>
+      <div className={cn('flex-1 h-px bg-border')} />
     </div>
   );
 }

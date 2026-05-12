@@ -379,7 +379,10 @@ export default function ChatPage() {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-foreground" />
+          <span className="mono-label">Loading conversation</span>
+        </div>
       </div>
     );
   }
@@ -388,18 +391,21 @@ export default function ChatPage() {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <ChatMessages messages={messages} isLoading={isStreaming} />
       {rateLimitError && (
-        <div className="mx-4 mb-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-          <div className="flex items-start gap-2 text-sm">
-            <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+        <div className="border-t border-destructive bg-background">
+          <div className="w-full px-3 sm:px-4 py-2 flex items-start gap-2 text-sm">
+            <AlertCircle
+              className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5"
+              strokeWidth={2}
+            />
             <div className="flex-1">
-              <p className="text-destructive font-medium">{rateLimitError}</p>
-              <p className="text-destructive/80 text-xs mt-1">
+              <p className="font-medium text-destructive">{rateLimitError}</p>
+              <p className="text-muted-foreground mt-1">
                 Contact us at{' '}
                 <a
                   href={`mailto:${contactEmail}`}
-                  className="underline hover:opacity-80 inline-flex items-center gap-1"
+                  className="underline underline-offset-4 decoration-foreground/40 hover:decoration-foreground text-foreground inline-flex items-center gap-1"
                 >
-                  <Mail className="h-3 w-3" />
+                  <Mail className="h-3 w-3" strokeWidth={1.75} />
                   {contactEmail}
                 </a>{' '}
                 to request more access.

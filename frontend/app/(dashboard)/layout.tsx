@@ -7,7 +7,6 @@ import { useGetCurrentUserQuery } from '@/lib/store/api/userApi';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { OpenRouterKeyModal } from '@/components/modals/OpenRouterKeyModal';
 import { RateLimitBanner } from '@/components/dashboard/RateLimitBanner';
-import { Hexagon } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -44,24 +43,10 @@ export default function DashboardLayout({
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background bg-gradient-radial">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="animate-pulse-glow">
-              <Hexagon className="h-16 w-16 text-primary hexagon-logo" />
-            </div>
-            <div className="absolute inset-0 animate-ping opacity-20">
-              <Hexagon className="h-16 w-16 text-primary" />
-            </div>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-neon-purple bg-clip-text text-transparent">
-              Glass
-            </span>
-            <span className="text-xs text-muted-foreground uppercase tracking-widest">
-              Loading
-            </span>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-start gap-2">
+          <span className="mono-label">Glass</span>
+          <span className="display-md">Loading<span className="animate-cursor text-primary">_</span></span>
         </div>
       </div>
     );
@@ -73,14 +58,11 @@ export default function DashboardLayout({
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden bg-background bg-grid-pattern">
-        {/* Gradient overlays */}
-        <div className="fixed inset-0 pointer-events-none bg-gradient-radial opacity-80" />
-
+      <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar />
         <main
-          className={`relative flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
-            sidebarOpen ? 'lg:ml-72' : 'lg:ml-16'
+          className={`relative flex-1 flex flex-col overflow-hidden transition-[margin] duration-200 ${
+            sidebarOpen ? 'lg:ml-72' : 'lg:ml-14'
           }`}
         >
           {user && <RateLimitBanner user={user} />}

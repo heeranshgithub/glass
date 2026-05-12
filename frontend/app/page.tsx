@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/lib/store';
-import { Hexagon } from 'lucide-react';
 
 export default function RootPage() {
   const router = useRouter();
@@ -23,9 +22,11 @@ export default function RootPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="animate-pulse flex items-center gap-3">
-        <Hexagon className="h-12 w-12 text-primary" />
-        <span className="text-2xl font-bold">Glass</span>
+      <div className="flex flex-col items-start gap-2">
+        <span className="mono-label">Glass / Council</span>
+        <span className="display-md">
+          Loading<span className="animate-cursor text-primary">_</span>
+        </span>
       </div>
     </div>
   );

@@ -16,33 +16,40 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import {
-  Loader2,
-  User,
-  Lock,
-  Palette,
-  Laptop,
-  Check,
-  Sun,
-  Moon,
-  Monitor,
-  Key,
-  Trash2,
-  Shield,
-  RefreshCw,
-} from 'lucide-react';
+import { Loader2, Check, Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+
+function SectionHeader({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <header className="grid grid-cols-[2.5rem_1fr] gap-3 items-baseline">
+      <span className="mono-label tabular-nums">{number}</span>
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+        {description && (
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
+    </header>
+  );
+}
+
+function SectionBody({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[2.5rem_1fr] gap-3">
+      <div />
+      <div className="space-y-4 max-w-xl">{children}</div>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
@@ -70,20 +77,16 @@ export default function SettingsPage() {
     newPassword: '',
     confirmPassword: '',
   });
-  const [apiKeyForm, setApiKeyForm] = useState({
-    apiKey: '',
-  });
+  const [apiKeyForm, setApiKeyForm] = useState({ apiKey: '' });
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [apiKeySuccess, setApiKeySuccess] = useState(false);
   const [demoResetSuccess, setDemoResetSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is demo or admin
   const isDemo = user?.isDemo === true;
   const isAdmin = user?.roles?.includes('admin') || false;
 
-  // Initialize form when user data loads
   useEffect(() => {
     if (user) {
       setProfileForm({
@@ -97,7 +100,6 @@ export default function SettingsPage() {
     e.preventDefault();
     setError(null);
     setProfileSuccess(false);
-
     try {
       await updateUser({
         fullName: profileForm.fullName || undefined,
@@ -115,12 +117,10 @@ export default function SettingsPage() {
     e.preventDefault();
     setError(null);
     setPasswordSuccess(false);
-
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setError('New passwords do not match');
       return;
     }
-
     try {
       await changePassword({
         currentPassword: passwordForm.currentPassword,
@@ -150,15 +150,37 @@ export default function SettingsPage() {
   const handleResetDemoLimit = async () => {
     setError(null);
     setDemoResetSuccess(false);
-
     try {
       await resetDemoLimit().unwrap();
       setDemoResetSuccess(true);
       setTimeout(() => setDemoResetSuccess(false), 3000);
     } catch (err: any) {
-      const errorMessage =
-        err?.data?.detail || 'Failed to reset demo limit. Please try again.';
-      setError(errorMessage);
+      setError(
+        err?.data?.detail || 'Failed to reset demo limit. Please try again.'
+      );
+    }
+  };
+
+  const submitApiKey = async (apiKey: string) => {
+    setError(null);
+    setApiKeySuccess(false);
+    if (!apiKey.trim()) {
+      setError('API key is required');
+      return;
+    }
+    if (!apiKey.startsWith('sk-or-')) {
+      setError(
+        'Invalid OpenRouter API key format. Keys must start with "sk-or-"'
+      );
+      return;
+    }
+    try {
+      await setOpenRouterKey({ apiKey: apiKey.trim() }).unwrap();
+      setApiKeySuccess(true);
+      setApiKeyForm({ apiKey: '' });
+      setTimeout(() => setApiKeySuccess(false), 3000);
+    } catch (err: any) {
+      setError(err?.data?.detail || 'Failed to save API key.');
     }
   };
 
@@ -171,364 +193,357 @@ export default function SettingsPage() {
   if (isLoadingUser) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <span className="mono-label">Loading settings</span>
+        </div>
       </div>
     );
   }
 
+  let sectionIndex = 0;
+  const nextNumber = () => String(++sectionIndex).padStart(2, '0');
+
   return (
     <div className="flex-1 overflow-auto">
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences
-          </p>
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 lg:py-10">
+        <div className="flex items-baseline justify-between mb-4">
+          <span className="mono-label">Glass / Settings</span>
+          <span className="mono-label">{user?.email}</span>
+        </div>
+        <div className="swiss-rule-strong mb-8" />
+
+        <div className="grid grid-cols-12 gap-5 lg:gap-6 mb-8 lg:mb-10">
+          <div className="col-span-12 lg:col-span-8">
+            <h1 className="display-lg leading-none">
+              Settings<span className="text-primary">.</span>
+            </h1>
+          </div>
+          <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Manage your account, appearance and integrations.
+            </p>
+          </div>
         </div>
 
         {error && (
-          <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+          <div
+            className="border-l-2 border-destructive pl-3 py-1 mb-6 text-sm text-destructive"
+            role="alert"
+          >
             {error}
           </div>
         )}
 
-        {/* Profile Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Profile
-            </CardTitle>
-            <CardDescription>Update your personal information</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleProfileUpdate}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={profileForm.fullName || user?.fullName || ''}
-                  onChange={e =>
-                    setProfileForm(prev => ({
-                      ...prev,
-                      fullName: e.target.value,
-                    }))
-                  }
-                  disabled={isDemo}
-                  className={isDemo ? 'bg-muted' : ''}
-                />
-                {isDemo && (
+        <div className="space-y-10 lg:space-y-12">
+          {/* Profile */}
+          <section className="space-y-4">
+            <SectionHeader
+              number={nextNumber()}
+              title="Profile"
+              description="Your personal information."
+            />
+            <div className="swiss-rule" />
+            <SectionBody>
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="mono-label">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={user?.email || ''}
+                    disabled
+                  />
                   <p className="text-xs text-muted-foreground">
-                    Profile editing is disabled for demo accounts
+                    Email cannot be changed.
                   </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullName" className="mono-label">
+                    Full name
+                  </Label>
+                  <Input
+                    id="fullName"
+                    value={profileForm.fullName || user?.fullName || ''}
+                    onChange={e =>
+                      setProfileForm(prev => ({
+                        ...prev,
+                        fullName: e.target.value,
+                      }))
+                    }
+                    disabled={isDemo}
+                  />
+                  {isDemo && (
+                    <p className="text-xs text-muted-foreground">
+                      Profile editing is disabled for demo accounts.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="username" className="mono-label">
+                    Username
+                  </Label>
+                  <Input
+                    id="username"
+                    value={profileForm.username || user?.username || ''}
+                    onChange={e =>
+                      setProfileForm(prev => ({
+                        ...prev,
+                        username: e.target.value,
+                      }))
+                    }
+                    placeholder="Optional"
+                    disabled={isDemo}
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 pt-2 mono-label">
+                  <span>
+                    Created{' '}
+                    {user?.createdAt
+                      ? formatDistanceToNow(new Date(user.createdAt), {
+                          addSuffix: true,
+                        })
+                      : 'unknown'}
+                  </span>
+                  {user?.roles && user.roles.length > 0 && (
+                    <span>Roles · {user.roles.join(', ')}</span>
+                  )}
+                </div>
+
+                {!isDemo && (
+                  <div>
+                    <Button type="submit" disabled={isUpdating}>
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Saving
+                        </>
+                      ) : profileSuccess ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Saved
+                        </>
+                      ) : (
+                        'Save changes'
+                      )}
+                    </Button>
+                  </div>
                 )}
-              </div>
+              </form>
+            </SectionBody>
+          </section>
 
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={profileForm.username || user?.username || ''}
-                  onChange={e =>
-                    setProfileForm(prev => ({
-                      ...prev,
-                      username: e.target.value,
-                    }))
-                  }
-                  placeholder="Optional"
-                  disabled={isDemo}
-                  className={isDemo ? 'bg-muted' : ''}
-                />
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Account created:</span>
-                <span>
-                  {user?.createdAt
-                    ? formatDistanceToNow(new Date(user.createdAt), {
-                        addSuffix: true,
-                      })
-                    : 'Unknown'}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Roles:</span>
-                {user?.roles.map(role => (
-                  <Badge key={role} variant="secondary">
-                    {role}
-                  </Badge>
+          {/* Appearance */}
+          <section className="space-y-4">
+            <SectionHeader
+              number={nextNumber()}
+              title="Appearance"
+              description="How Glass looks on your device."
+            />
+            <div className="swiss-rule" />
+            <SectionBody>
+              <div className="grid grid-cols-3 gap-3">
+                {themes.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    onClick={() => dispatch(setTheme(value))}
+                    className={cn(
+                      'flex flex-col items-start gap-2 p-3 border transition-colors text-left',
+                      theme === value
+                        ? 'border-foreground bg-foreground text-background'
+                        : 'border-border hover:border-foreground'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" strokeWidth={1.75} />
+                    <span className="text-sm font-medium">{label}</span>
+                  </button>
                 ))}
               </div>
-            </CardContent>
-            {!isDemo && (
-              <CardFooter>
-                <Button type="submit" disabled={isUpdating}>
-                  {isUpdating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : profileSuccess ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Saved!
-                    </>
-                  ) : (
-                    'Save Changes'
-                  )}
-                </Button>
-              </CardFooter>
-            )}
-          </form>
-        </Card>
+            </SectionBody>
+          </section>
 
-        {/* Theme Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
-              Appearance
-            </CardTitle>
-            <CardDescription>
-              Customize how Glass looks on your device
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-3">
-              {themes.map(({ value, label, icon: Icon }) => (
-                <button
-                  key={value}
-                  onClick={() => dispatch(setTheme(value))}
-                  className={cn(
-                    'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
-                    theme === value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
-                  )}
-                >
-                  <Icon className="h-6 w-6" />
-                  <span className="text-sm font-medium">{label}</span>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Password Section - Hidden for demo users */}
-        {!isDemo && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5" />
-                Password
-              </CardTitle>
-              <CardDescription>Change your password</CardDescription>
-            </CardHeader>
-            <form onSubmit={handlePasswordChange}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={passwordForm.currentPassword}
-                    onChange={e =>
-                      setPasswordForm(prev => ({
-                        ...prev,
-                        currentPassword: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={passwordForm.newPassword}
-                    onChange={e =>
-                      setPasswordForm(prev => ({
-                        ...prev,
-                        newPassword: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={passwordForm.confirmPassword}
-                    onChange={e =>
-                      setPasswordForm(prev => ({
-                        ...prev,
-                        confirmPassword: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isChangingPassword}>
-                  {isChangingPassword ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Changing...
-                    </>
-                  ) : passwordSuccess ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Changed!
-                    </>
-                  ) : (
-                    'Change Password'
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        )}
-
-        {/* OpenRouter API Key Section - Hidden for demo users */}
-        {!isDemo && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                OpenRouter API Key
-              </CardTitle>
-              <CardDescription>
-                Manage your OpenRouter API key for LLM Council features
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {user?.hasOpenRouterKey ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
-                    <Check className="h-5 w-5 text-green-600" />
-                    <span className="text-sm font-medium">
-                      API key is configured
-                    </span>
+          {/* Password */}
+          {!isDemo && (
+            <section className="space-y-4">
+              <SectionHeader
+                number={nextNumber()}
+                title="Password"
+                description="Change the password used to sign in."
+              />
+              <div className="swiss-rule" />
+              <SectionBody>
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="currentPassword" className="mono-label">
+                      Current password
+                    </Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={e =>
+                        setPasswordForm(prev => ({
+                          ...prev,
+                          currentPassword: e.target.value,
+                        }))
+                      }
+                      required
+                    />
                   </div>
-                  <form
-                    onSubmit={async e => {
-                      e.preventDefault();
-                      setError(null);
-                      setApiKeySuccess(false);
-
-                      if (!apiKeyForm.apiKey.trim()) {
-                        setError('API key is required');
-                        return;
+                  <div className="space-y-1.5">
+                    <Label htmlFor="newPassword" className="mono-label">
+                      New password
+                    </Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={e =>
+                        setPasswordForm(prev => ({
+                          ...prev,
+                          newPassword: e.target.value,
+                        }))
                       }
-
-                      if (!apiKeyForm.apiKey.startsWith('sk-or-')) {
-                        setError(
-                          'Invalid OpenRouter API key format. Keys must start with "sk-or-"'
-                        );
-                        return;
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="confirmPassword" className="mono-label">
+                      Confirm new password
+                    </Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={e =>
+                        setPasswordForm(prev => ({
+                          ...prev,
+                          confirmPassword: e.target.value,
+                        }))
                       }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Button type="submit" disabled={isChangingPassword}>
+                      {isChangingPassword ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Changing
+                        </>
+                      ) : passwordSuccess ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Changed
+                        </>
+                      ) : (
+                        'Change password'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </SectionBody>
+            </section>
+          )}
 
-                      try {
-                        await setOpenRouterKey({
-                          apiKey: apiKeyForm.apiKey.trim(),
-                        }).unwrap();
-                        setApiKeySuccess(true);
-                        setApiKeyForm({ apiKey: '' });
-                        setTimeout(() => setApiKeySuccess(false), 3000);
-                      } catch (err: any) {
-                        const errorMessage =
-                          err?.data?.detail ||
-                          'Failed to update API key. Please try again.';
-                        setError(errorMessage);
-                      }
-                    }}
-                    className="space-y-4"
-                  >
-                    <div className="space-y-2">
-                      <Label htmlFor="apiKey">Update API Key</Label>
-                      <Input
-                        id="apiKey"
-                        type="password"
-                        placeholder="sk-or-..."
-                        value={apiKeyForm.apiKey}
-                        onChange={e => {
-                          setApiKeyForm(prev => ({
-                            ...prev,
-                            apiKey: e.target.value,
-                          }));
-                          setError(null);
-                        }}
-                        disabled={isSettingKey}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Get your API key from{' '}
-                        <a
-                          href="https://openrouter.ai/keys"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          openrouter.ai/keys
-                        </a>
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button type="submit" disabled={isSettingKey}>
-                        {isSettingKey ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Updating...
-                          </>
-                        ) : apiKeySuccess ? (
-                          <>
-                            <Check className="mr-2 h-4 w-4" />
-                            Updated!
-                          </>
-                        ) : (
-                          'Update Key'
-                        )}
-                      </Button>
+          {/* API Key */}
+          {!isDemo && (
+            <section className="space-y-4">
+              <SectionHeader
+                number={nextNumber()}
+                title="OpenRouter API key"
+                description="Required to use the council. Encrypted at rest."
+              />
+              <div className="swiss-rule" />
+              <SectionBody>
+                {user?.hasOpenRouterKey ? (
+                  <p className="mono-label flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 bg-foreground" />
+                    Configured
+                  </p>
+                ) : (
+                  <p className="mono-label flex items-center gap-2 text-primary">
+                    <span className="h-1.5 w-1.5 bg-primary" />
+                    Not configured
+                  </p>
+                )}
+
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    submitApiKey(apiKeyForm.apiKey);
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="space-y-1.5">
+                    <Label htmlFor="apiKey" className="mono-label">
+                      {user?.hasOpenRouterKey ? 'Update key' : 'API key'}
+                    </Label>
+                    <Input
+                      id="apiKey"
+                      type="password"
+                      placeholder="sk-or-..."
+                      value={apiKeyForm.apiKey}
+                      onChange={e => {
+                        setApiKeyForm({ apiKey: e.target.value });
+                        setError(null);
+                      }}
+                      disabled={isSettingKey}
+                      required={!user?.hasOpenRouterKey}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Get your key from{' '}
+                      <a
+                        href="https://openrouter.ai/keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-foreground underline underline-offset-4 decoration-foreground/40 hover:decoration-foreground"
+                      >
+                        openrouter.ai/keys
+                      </a>
+                      .
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <Button type="submit" disabled={isSettingKey}>
+                      {isSettingKey ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Saving
+                        </>
+                      ) : apiKeySuccess ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Saved
+                        </>
+                      ) : user?.hasOpenRouterKey ? (
+                        'Update key'
+                      ) : (
+                        'Save key'
+                      )}
+                    </Button>
+                    {user?.hasOpenRouterKey && (
                       <Button
                         type="button"
                         variant="destructive"
                         onClick={async () => {
                           if (
                             confirm(
-                              'Are you sure you want to remove your API key? You will not be able to use LLM Council features until you add a new key.'
+                              'Remove your API key? You will not be able to use the council until you add a new key.'
                             )
                           ) {
                             try {
                               await removeOpenRouterKey().unwrap();
-                              setApiKeySuccess(true);
-                              setTimeout(() => setApiKeySuccess(false), 3000);
                             } catch (err: any) {
-                              const errorMessage =
+                              setError(
                                 err?.data?.detail ||
-                                'Failed to remove API key. Please try again.';
-                              setError(errorMessage);
+                                  'Failed to remove API key.'
+                              );
                             }
                           }
                         }}
@@ -536,191 +551,99 @@ export default function SettingsPage() {
                       >
                         {isRemovingKey ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Removing...
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Removing
                           </>
                         ) : (
-                          <>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Remove Key
-                          </>
+                          'Remove key'
                         )}
                       </Button>
+                    )}
+                  </div>
+                </form>
+              </SectionBody>
+            </section>
+          )}
+
+          {/* Admin */}
+          {isAdmin && (
+            <section className="space-y-4">
+              <SectionHeader
+                number={nextNumber()}
+                title="Admin"
+                description="Manage demo account settings."
+              />
+              <div className="swiss-rule" />
+              <SectionBody>
+                <div className="flex items-baseline justify-between gap-6">
+                  <div>
+                    <div className="text-sm font-medium">
+                      Reset demo daily limit
                     </div>
-                  </form>
-                </div>
-              ) : (
-                <form
-                  onSubmit={async e => {
-                    e.preventDefault();
-                    setError(null);
-                    setApiKeySuccess(false);
-
-                    if (!apiKeyForm.apiKey.trim()) {
-                      setError('API key is required');
-                      return;
-                    }
-
-                    if (!apiKeyForm.apiKey.startsWith('sk-or-')) {
-                      setError(
-                        'Invalid OpenRouter API key format. Keys must start with "sk-or-"'
-                      );
-                      return;
-                    }
-
-                    try {
-                      await setOpenRouterKey({
-                        apiKey: apiKeyForm.apiKey.trim(),
-                      }).unwrap();
-                      setApiKeySuccess(true);
-                      setApiKeyForm({ apiKey: '' });
-                      setTimeout(() => setApiKeySuccess(false), 3000);
-                    } catch (err: any) {
-                      const errorMessage =
-                        err?.data?.detail ||
-                        'Failed to save API key. Please try again.';
-                      setError(errorMessage);
-                    }
-                  }}
-                  className="space-y-4"
-                >
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                      You need to add an OpenRouter API key to use LLM Council
-                      features.
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Reset the demo user&rsquo;s daily request count to zero.
                     </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="apiKey">OpenRouter API Key</Label>
-                    <Input
-                      id="apiKey"
-                      type="password"
-                      placeholder="sk-or-..."
-                      value={apiKeyForm.apiKey}
-                      onChange={e => {
-                        setApiKeyForm(prev => ({
-                          ...prev,
-                          apiKey: e.target.value,
-                        }));
-                        setError(null);
-                      }}
-                      disabled={isSettingKey}
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Get your API key from{' '}
-                      <a
-                        href="https://openrouter.ai/keys"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        openrouter.ai/keys
-                      </a>
-                    </p>
-                  </div>
-                  <Button type="submit" disabled={isSettingKey}>
-                    {isSettingKey ? (
+                  <Button
+                    onClick={handleResetDemoLimit}
+                    disabled={isResettingDemoLimit}
+                    variant="outline"
+                  >
+                    {isResettingDemoLimit ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Resetting
                       </>
-                    ) : apiKeySuccess ? (
+                    ) : demoResetSuccess ? (
                       <>
-                        <Check className="mr-2 h-4 w-4" />
-                        Saved!
+                        <Check className="h-4 w-4" />
+                        Reset
                       </>
                     ) : (
-                      'Save API Key'
+                      'Reset limit'
                     )}
                   </Button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Admin Section - Only for admins */}
-        {isAdmin && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Admin Controls
-              </CardTitle>
-              <CardDescription>Manage demo account settings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div>
-                  <div className="font-medium">Demo Account Management</div>
-                  <div className="text-sm text-muted-foreground">
-                    Reset the demo user's daily request limit back to 3
-                  </div>
                 </div>
-                <Button
-                  onClick={handleResetDemoLimit}
-                  disabled={isResettingDemoLimit}
-                  variant="default"
-                >
-                  {isResettingDemoLimit ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Resetting...
-                    </>
-                  ) : demoResetSuccess ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Reset!
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Reset Demo Limit
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </SectionBody>
+            </section>
+          )}
 
-        {/* Security Section */}
-        {!isDemo && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Laptop className="h-5 w-5" />
-                Security
-              </CardTitle>
-              <CardDescription>Manage your active sessions</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                <div>
-                  <div className="font-medium">Active Sessions</div>
-                  <div className="text-sm text-muted-foreground">
-                    Sign out from all devices except this one
+          {/* Security */}
+          {!isDemo && (
+            <section className="space-y-4">
+              <SectionHeader
+                number={nextNumber()}
+                title="Security"
+                description="Manage your active sessions."
+              />
+              <div className="swiss-rule" />
+              <SectionBody>
+                <div className="flex items-baseline justify-between gap-6">
+                  <div>
+                    <div className="text-sm font-medium">Active sessions</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Sign out from all devices except this one.
+                    </p>
                   </div>
+                  <Button
+                    variant="destructive"
+                    onClick={handleLogoutAllDevices}
+                    disabled={isLoggingOutAll}
+                  >
+                    {isLoggingOutAll ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Signing out
+                      </>
+                    ) : (
+                      'Sign out all devices'
+                    )}
+                  </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  onClick={handleLogoutAllDevices}
-                  disabled={isLoggingOutAll}
-                >
-                  {isLoggingOutAll ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing out...
-                    </>
-                  ) : (
-                    'Sign out all devices'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </SectionBody>
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );

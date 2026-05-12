@@ -9,15 +9,7 @@ import { setTokens } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Loader2, Mail, Lock, Hexagon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,97 +37,93 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-      {/* Mobile Logo */}
-      <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-        <Hexagon className="h-10 w-10 text-primary" />
-        <span className="text-2xl font-bold tracking-tight">Glass</span>
+    <div className="space-y-10">
+      {/* Mobile mark */}
+      <div className="lg:hidden flex items-baseline gap-2">
+        <span className="text-2xl font-bold tracking-tighter">Glass</span>
+        <span className="mono-label">/ Council</span>
       </div>
 
-      <Card className="border-0 shadow-xl">
-        <CardHeader className="space-y-1 pb-6">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Enter your credentials to access the council
-          </CardDescription>
-        </CardHeader>
+      <div className="space-y-3">
+        <span className="mono-label">01 / Sign in</span>
+        <h2 className="display-md leading-none">
+          Welcome
+          <br />
+          back<span className="text-primary">.</span>
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Enter your credentials to access the council.
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                {error}
-              </div>
-            )}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div
+            className="border-l-2 border-destructive pl-3 py-1 text-sm text-destructive"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-            </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="mono-label">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                {/* <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link> */}
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-            </div>
-          </CardContent>
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="mono-label">
+            Password
+          </Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
+        </div>
 
-          <CardFooter className="flex flex-col gap-4 mt-2">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                'Sign in'
-              )}
-            </Button>
-            {process.env.NODE_ENV !== 'production' && (
-              <p className="text-sm text-center text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Link
-                  href="/register"
-                  className="text-primary font-medium hover:underline"
-                >
-                  Create one
-                </Link>
-              </p>
-            )}
-          </CardFooter>
-        </form>
-      </Card>
-    </>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Signing in
+            </>
+          ) : (
+            'Sign in'
+          )}
+        </Button>
+
+        {process.env.NODE_ENV !== 'production' && (
+          <p className="text-sm text-muted-foreground">
+            Don&rsquo;t have an account?{' '}
+            <Link
+              href="/register"
+              className="text-foreground font-medium underline underline-offset-4 decoration-foreground/40 hover:decoration-foreground"
+            >
+              Create one
+            </Link>
+          </p>
+        )}
+      </form>
+    </div>
   );
 }

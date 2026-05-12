@@ -36,12 +36,9 @@ export default function WaitlistPage() {
   };
 
   return (
-    // Force dark theme at first paint for /waitlist (no light-mode flash)
-    <div className="dark" style={{ colorScheme: 'dark' }}>
-      <div className="min-h-screen bg-background text-foreground">
-        <WaitlistMobile {...sharedProps} />
-        <WaitlistDesktop {...sharedProps} />
-      </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <WaitlistMobile {...sharedProps} />
+      <WaitlistDesktop {...sharedProps} />
     </div>
   );
 }
