@@ -5,20 +5,24 @@ import {
   useAppDispatch,
   useCreateConversationMutation,
   setCurrentConversationId,
-  useGetCouncilHealthQuery,
   useGetCurrentUserQuery,
 } from '@/lib/store';
+import { CHAT_MODELS } from '@/lib/types';
 import { ArrowRight, Loader2 } from 'lucide-react';
+
+const MODEL_DESCRIPTIONS: Record<string, string> = {
+  'openai/gpt-5.1':                "OpenAI's flagship reasoning model",
+  'google/gemini-3.1-pro-preview': "Google's multimodal powerhouse",
+  'anthropic/claude-sonnet-4.5':   "Anthropic's balanced intelligence",
+  'x-ai/grok-4.20':                "xAI's real-time reasoning model",
+};
 
 export default function HomePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [createConversation, { isLoading: isCreating }] =
     useCreateConversationMutation();
-  const { data: health, isLoading: isLoadingHealth } =
-    useGetCouncilHealthQuery();
-  const { data: user, isLoading: isLoadingUser } = useGetCurrentUserQuery();
-  const isDemo = user?.isDemo === true;
+  const { data: user } = useGetCurrentUserQuery();
 
   const handleNewConversation = async () => {
     try {
@@ -30,37 +34,19 @@ export default function HomePage() {
     }
   };
 
-  const stages = [
-    {
-      n: '01',
-      title: 'Responses',
-      body: 'Each model independently analyses your question and answers in its own voice.',
-    },
-    {
-      n: '02',
-      title: 'Rankings',
-      body: 'Models evaluate one another anonymously—no name, no bias, just judgement.',
-    },
-    {
-      n: '03',
-      title: 'Synthesis',
-      body: 'An arbiter resolves the field into a single, well-reasoned answer.',
-    },
-  ];
-
   return (
     <div className="flex-1 overflow-auto bg-background selection:bg-primary selection:text-primary-foreground">
       <div className="max-w-[90rem] mx-auto px-6 md:px-12 py-8 lg:py-12">
-        {/* Hero — asymmetric grid */}
+        {/* Hero */}
         <section
           className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-end animate-fade-up"
           style={{ animationDelay: '0ms' }}
         >
           <div className="lg:col-span-8">
-            <h1 className="display-xl leading-[0.9]">Multi-model consensus</h1>
+            <h1 className="display-xl leading-[0.9]">Ask anything.</h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground max-w-2xl font-light">
-              Harness the collective intelligence of multiple AI models through
-              a rigorous three-stage evaluation process.
+              Chat with the world&apos;s best AI models. Pick your model, start a
+              conversation — switch anytime.
             </p>
           </div>
 
@@ -92,96 +78,60 @@ export default function HomePage() {
           style={{ animationDelay: '100ms' }}
         />
 
-        {/* Process — three-column editorial */}
+        {/* Models */}
         <section
-          className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 animate-fade-up"
+          className="animate-fade-up"
           style={{ animationDelay: '200ms' }}
         >
-          {stages.map((stage, i) => (
-            <article key={stage.n} className="group relative">
-              <div className="absolute top-0 left-0 w-full h-px bg-border group-hover:bg-foreground transition-colors duration-500" />
-              <div className="absolute top-0 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-700 ease-out" />
+          <h2 className="mono-label mb-8">Available Models</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border">
+            {CHAT_MODELS.map((model, i) => (
+              <article
+                key={model.id}
+                className="group relative bg-background"
+                style={{ animationDelay: `${220 + i * 60}ms` }}
+              >
+                <div className="absolute top-0 left-0 right-0 h-px bg-border transition-colors duration-500 group-hover:bg-foreground" />
+                <div className="absolute top-0 left-0 h-px w-0 bg-primary transition-all duration-700 ease-out group-hover:w-full" />
 
-              <div className="pt-6">
-                <div className="flex items-baseline justify-between mb-4">
-                  <span className="text-4xl font-light text-muted-foreground group-hover:text-foreground transition-colors duration-500">
-                    {stage.n}
-                  </span>
+                <div className="pt-6 pb-6 px-4 space-y-3">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-3xl font-light text-muted-foreground group-hover:text-foreground transition-colors duration-500 tabular-nums">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold tracking-tight group-hover:text-primary transition-colors duration-500">
+                      {model.label}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                      {MODEL_DESCRIPTIONS[model.id]}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-medium tracking-tight mb-2 group-hover:text-primary transition-colors duration-500">
-                    {stage.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {stage.body}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))}
+          </div>
         </section>
 
         <div
           className="swiss-rule mt-12 lg:mt-16 mb-12 animate-fade-up"
-          style={{ animationDelay: '300ms' }}
+          style={{ animationDelay: '400ms' }}
         />
 
         {/* Status */}
         <section
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 animate-fade-up"
-          style={{ animationDelay: '400ms' }}
+          className="animate-fade-up"
+          style={{ animationDelay: '500ms' }}
         >
-          <div className="lg:col-span-3 space-y-4">
-            <h2 className="mono-label">System Status</h2>
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-3 w-3">
-                <span
-                  className={`animate-ping absolute inline-flex h-full w-full opacity-50 ${health?.openrouterConfigured ? 'bg-foreground' : 'bg-primary'}`}
-                ></span>
-                <span
-                  className={`relative inline-flex h-3 w-3 ${health?.openrouterConfigured ? 'bg-foreground' : 'bg-primary'}`}
-                ></span>
-              </div>
-              <span className="text-sm font-medium">
-                {isLoadingHealth || isLoadingUser
-                  ? 'Checking...'
-                  : health?.openrouterConfigured || isDemo
-                    ? 'All systems operational'
-                    : 'OpenRouter not configured'}
-              </span>
+          <h2 className="mono-label mb-4">System Status</h2>
+          <div className="flex items-center gap-3">
+            <div className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full bg-foreground opacity-50" />
+              <span className="relative inline-flex h-3 w-3 bg-foreground" />
             </div>
+            <span className="text-sm font-medium">All systems operational</span>
           </div>
-
-          {health && (
-            <>
-              <div className="lg:col-span-6 space-y-4">
-                <h2 className="mono-label">Active Council Models</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border">
-                  {health.councilModels.map((model, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-3 bg-background"
-                    >
-                      <span className="text-sm font-mono truncate mr-4">
-                        {model.split('/').pop()}
-                      </span>
-                      <span className="mono-label shrink-0 text-muted-foreground">
-                        {String.fromCharCode(65 + i)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="lg:col-span-3 space-y-4">
-                <h2 className="mono-label">Arbiter Model</h2>
-                <div className="p-3 border border-border bg-foreground text-background">
-                  <span className="text-sm font-mono block truncate">
-                    {health.arbiterModel.split('/').pop()}
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
         </section>
       </div>
     </div>

@@ -2,19 +2,32 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ArrowUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CHAT_MODELS } from '@/lib/types';
+import type { ModelId } from '@/lib/types';
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
   isLoading: boolean;
   disabled?: boolean;
+  selectedModel: ModelId;
+  onModelChange: (id: ModelId) => void;
 }
 
 export function ChatInput({
   onSendMessage,
   isLoading,
   disabled,
+  selectedModel,
+  onModelChange,
 }: ChatInputProps) {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -57,7 +70,7 @@ export function ChatInput({
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask the council—"
+              placeholder="Ask anything—"
               disabled={isLoading || disabled}
               className={cn(
                 'min-h-[40px] max-h-[200px] resize-none border-0 bg-transparent shadow-none',
@@ -88,10 +101,37 @@ export function ChatInput({
           </button>
         </div>
 
-        <div className="flex items-baseline justify-between mt-1.5 gap-2">
-          <span className="mono-label">
-            01 · responses → 02 · rankings → 03 · synthesis
-          </span>
+        <div className="flex items-center justify-between mt-1.5 gap-2">
+          <Select
+            value={selectedModel}
+            onValueChange={val => onModelChange(val as ModelId)}
+            disabled={isLoading || disabled}
+          >
+            <SelectTrigger
+              className={cn(
+                'h-auto w-auto border-0 bg-transparent shadow-none p-0 gap-1.5',
+                'mono-label text-muted-foreground hover:text-foreground transition-colors',
+                'focus:ring-0 focus:ring-offset-0 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:opacity-60'
+              )}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              className="border-border bg-popover"
+              style={{ borderRadius: 0 }}
+            >
+              {CHAT_MODELS.map(model => (
+                <SelectItem
+                  key={model.id}
+                  value={model.id}
+                  className="mono-label cursor-pointer rounded-none focus:bg-muted"
+                >
+                  {model.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <span className="mono-label hidden sm:inline">
             <kbd className="font-mono">↵</kbd> send ·{' '}
             <kbd className="font-mono">⇧↵</kbd> new line

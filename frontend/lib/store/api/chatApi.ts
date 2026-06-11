@@ -1,9 +1,5 @@
 import { baseApi, API_BASE_URL } from './baseApi';
-import type {
-  Conversation,
-  ConversationListResponse,
-  CouncilHealthResponse,
-} from '@/lib/types';
+import type { Conversation, ConversationListResponse } from '@/lib/types';
 
 interface StreamMessageArgs {
   conversationId: string;
@@ -12,18 +8,13 @@ interface StreamMessageArgs {
   signal?: AbortSignal;
 }
 
-/**
- * Stream a message to a conversation
- * @param args The stream message arguments
- * @returns The fetch Response object for streaming
- */
 export async function streamConversationMessage({
   conversationId,
   content,
   token,
   signal,
 }: StreamMessageArgs): Promise<Response> {
-  const response = await fetch(
+  return fetch(
     `${API_BASE_URL}/ml/conversations/${conversationId}/messages`,
     {
       method: 'POST',
@@ -35,11 +26,9 @@ export async function streamConversationMessage({
       signal,
     }
   );
-
-  return response;
 }
 
-export const councilApi = baseApi.injectEndpoints({
+export const chatApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     listConversations: builder.query<ConversationListResponse, void>({
       query: () => '/ml/conversations',
@@ -67,11 +56,6 @@ export const councilApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['ConversationList'],
     }),
-
-    getCouncilHealth: builder.query<CouncilHealthResponse, void>({
-      query: () => '/ml/health',
-      providesTags: ['CouncilHealth'],
-    }),
   }),
 });
 
@@ -80,5 +64,4 @@ export const {
   useCreateConversationMutation,
   useGetConversationQuery,
   useDeleteConversationMutation,
-  useGetCouncilHealthQuery,
-} = councilApi;
+} = chatApi;

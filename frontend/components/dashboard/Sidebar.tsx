@@ -27,7 +27,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Trophy,
   Home,
   Loader2,
 } from 'lucide-react';
@@ -78,7 +77,6 @@ export function Sidebar() {
 
   const navItems = [
     { href: '/home', label: 'Home', icon: Home },
-    { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   ];
 
   return (

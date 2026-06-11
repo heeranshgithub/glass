@@ -10,8 +10,6 @@ import logging
 import os
 from dataclasses import dataclass
 
-import boto3
-from botocore.exceptions import ClientError
 
 
 logger = logging.getLogger(__name__)
@@ -59,6 +57,14 @@ class SecretsService:
             return
 
         logger.info("Loading secrets from AWS Secrets Manager...")
+        try:
+            import boto3
+            from botocore.exceptions import ClientError
+        except ImportError as error:
+            raise RuntimeError(
+                "boto3 is required when APP_ENV=production (AWS Secrets Manager)"
+            ) from error
+
         client = boto3.client("secretsmanager", region_name=self.region)
 
         for config in self.secrets_config:
