@@ -20,7 +20,7 @@ from schemas.user import (
 )
 from pydantic import Field
 from schemas.base import CamelSchema, camel_config
-from app.config import DEMO_EMAIL
+from app.config import DEMO_EMAIL, OPENROUTER_API_KEY
 from services.rate_limit_service import RateLimitService
 
 router = APIRouter()
@@ -28,6 +28,10 @@ router = APIRouter()
 async def get_user_openrouter_key(user_id: str, db: AsyncIOMotorDatabase) -> Optional[str]:
     """
     Fetch and decrypt the user's OpenRouter API key.
+
+    The shared demo account always resolves to the platform key. Every visitor
+    signs in as that one account, so a stale per-user credential stored on it
+    breaks the council for everybody at once.
 
     Returns None if the user has not configured a key.
 
@@ -43,6 +47,9 @@ async def get_user_openrouter_key(user_id: str, db: AsyncIOMotorDatabase) -> Opt
 
     if not user_doc:
         raise ValueError("User not found")
+
+    if DEMO_EMAIL and user_doc.get("email") == DEMO_EMAIL and OPENROUTER_API_KEY:
+        return OPENROUTER_API_KEY
 
     encrypted = user_doc.get("openrouter_api_key_encrypted")
     if not encrypted:

@@ -67,8 +67,11 @@ export function RateLimitBanner({ user }: RateLimitBannerProps) {
             href={`mailto:${contactEmail}`}
             className="inline-flex items-center gap-1.5 text-sm underline underline-offset-4 decoration-destructive/40 hover:decoration-destructive"
           >
-            <Mail className="h-3 w-3" strokeWidth={1.75} />
-            Request more
+            <Mail className="h-3 w-3 shrink-0" strokeWidth={1.75} />
+            <span>
+              Request more &mdash;{' '}
+              <span className="font-medium">{contactEmail}</span>
+            </span>
           </a>
         )}
       </div>

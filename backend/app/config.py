@@ -69,6 +69,9 @@ if _smtp_security_env:
 else:
     SMTP_SECURITY = "ssl" if SMTP_PORT == 465 else "starttls"
 
+# Platform-wide OpenRouter key, used for the shared demo account.
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+
 # Demo and Admin Configuration
 DEMO_EMAIL = os.getenv("DEMO_EMAIL", "")
 DEMO_PASS = os.getenv("DEMO_PASS", "")
