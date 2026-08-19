@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useRef,
+  useCallback,
+} from 'react';
 import { useParams } from 'next/navigation';
 import {
   useAppDispatch,
@@ -389,8 +395,8 @@ export default function ChatPage() {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <ChatMessages messages={messages} isLoading={isStreaming} />
       {rateLimitError && (
-        <div className="border-t border-destructive bg-background">
-          <div className="w-full px-2.5 sm:px-3.5 py-2 flex items-start gap-2 text-sm">
+        <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-1">
+          <div className="rounded-2xl bg-destructive/10 px-4 py-3 flex items-start gap-2 text-sm">
             <AlertCircle
               className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5"
               strokeWidth={2}

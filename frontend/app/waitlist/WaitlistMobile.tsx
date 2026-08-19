@@ -29,12 +29,12 @@ export function WaitlistMobile(props: Props) {
         <h1 className="display-lg">
           Questions
           <br />
-          that matter<span className="text-primary">.</span>
+          that matter
         </h1>
 
         <p className="text-base text-muted-foreground leading-relaxed">
-          You ask. A council of models answers. They rank each other. An
-          arbiter synthesises the best parts into one response.
+          You ask. A council of models answers. They rank each other. An arbiter
+          synthesises the best parts into one response.
         </p>
 
         <div className="swiss-rule" />

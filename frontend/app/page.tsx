@@ -22,12 +22,7 @@ export default function RootPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex flex-col items-start gap-2">
-        <span className="mono-label">Glass</span>
-        <span className="display-md">
-          Loading<span className="animate-cursor text-primary">_</span>
-        </span>
-      </div>
+      <span className="text-sm text-muted-foreground">Loading…</span>
     </div>
   );
 }

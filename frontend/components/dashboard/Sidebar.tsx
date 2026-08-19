@@ -81,6 +81,14 @@ export function Sidebar() {
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   ];
 
+  const rowClass = (active: boolean) =>
+    cn(
+      'flex w-full items-center rounded-xl text-sm transition-colors',
+      active
+        ? 'bg-muted text-foreground font-medium'
+        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+    );
+
   return (
     <>
       {sidebarOpen && (
@@ -92,7 +100,7 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full flex flex-col bg-background border-r border-border transition-[width,transform] duration-200 ease-out',
+          'fixed top-0 left-0 z-50 h-full flex flex-col bg-sidebar transition-[width,transform] duration-200 ease-out',
           sidebarOpen ? 'w-72' : 'w-14',
           'lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -101,24 +109,21 @@ export function Sidebar() {
         {/* Brand row */}
         <div
           className={cn(
-            'flex items-center h-14 border-b border-border',
-            sidebarOpen ? 'px-5 justify-between' : 'px-0 justify-center'
+            'flex items-center h-14 shrink-0',
+            sidebarOpen ? 'px-4 justify-between' : 'px-0 justify-center'
           )}
         >
           {sidebarOpen ? (
             <>
               <button
                 onClick={() => router.push('/home')}
-                className="flex items-baseline gap-2 group"
+                className="px-2 text-xl font-bold tracking-tighter leading-none"
               >
-                <span className="text-2xl font-bold tracking-tighter leading-none">
-                  Glass
-                </span>
-                <span className="mono-label leading-none">Glass</span>
+                Glass
               </button>
               <button
                 onClick={() => dispatch(toggleSidebar())}
-                className="hidden lg:flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
                 aria-label="Collapse sidebar"
               >
                 <PanelLeftClose className="h-4 w-4" />
@@ -127,7 +132,7 @@ export function Sidebar() {
           ) : (
             <button
               onClick={() => dispatch(toggleSidebar())}
-              className="hidden lg:flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
               aria-label="Expand sidebar"
             >
               <PanelLeftOpen className="h-4 w-4" />
@@ -135,33 +140,32 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* New conversation */}
-        <div className={cn(sidebarOpen ? 'px-5 py-5' : 'px-2 py-3')}>
+        {/* Actions + nav */}
+        <div
+          className={cn(
+            'flex flex-col gap-0.5',
+            sidebarOpen ? 'px-3 pt-2' : 'px-2 pt-2 items-center'
+          )}
+        >
           <button
             onClick={handleNewConversation}
             disabled={isCreating}
             className={cn(
-              'group inline-flex items-center text-sm font-medium transition-colors',
-              'text-foreground hover:text-primary disabled:opacity-50',
-              sidebarOpen ? 'gap-2' : 'w-full justify-center'
+              rowClass(false),
+              'text-foreground disabled:opacity-50',
+              sidebarOpen ? 'gap-3 px-3 h-10' : 'justify-center h-10 w-10'
             )}
           >
             {isCreating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin shrink-0" />
             ) : (
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
+              <Plus className="h-4 w-4 shrink-0" strokeWidth={2.25} />
             )}
-            {sidebarOpen && <span>New conversation</span>}
+            {sidebarOpen && (
+              <span className="font-medium">New conversation</span>
+            )}
           </button>
-        </div>
 
-        {/* Nav */}
-        <nav
-          className={cn(
-            'flex flex-col',
-            sidebarOpen ? 'px-5 pb-5' : 'px-2 pb-3 items-center'
-          )}
-        >
           {navItems.map(item => {
             const active = pathname === item.href;
             const Icon = item.icon;
@@ -170,98 +174,78 @@ export function Sidebar() {
                 key={item.href}
                 onClick={() => router.push(item.href)}
                 className={cn(
-                  'group flex items-center text-sm transition-colors h-9',
-                  active
-                    ? 'text-foreground font-medium'
-                    : 'text-muted-foreground hover:text-foreground',
-                  sidebarOpen ? 'gap-3' : 'w-full justify-center'
+                  rowClass(active),
+                  sidebarOpen ? 'gap-3 px-3 h-10' : 'justify-center h-10 w-10'
                 )}
               >
-                <Icon className="h-4 w-4" strokeWidth={active ? 2.25 : 1.75} />
+                <Icon
+                  className="h-4 w-4 shrink-0"
+                  strokeWidth={active ? 2.25 : 1.75}
+                />
                 {sidebarOpen && <span>{item.label}</span>}
-                {sidebarOpen && active && (
-                  <span className="ml-auto h-1 w-1 bg-primary" />
-                )}
               </button>
             );
           })}
-        </nav>
+        </div>
 
         {/* Conversation list */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 mt-4">
           {sidebarOpen && (
-            <div className="px-5 pt-2 pb-3">
-              <span className="eyebrow">Conversations</span>
-            </div>
-          )}
+            <>
+              <div className="px-6 pb-2 text-xs text-muted-foreground">
+                Chats
+              </div>
 
-          {sidebarOpen && <div className="swiss-rule mx-5 mb-1" />}
-
-          {isLoadingConversations
-            ? sidebarOpen && (
-                <div className="px-5 py-4">
+              {isLoadingConversations ? (
+                <div className="px-6 py-3">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
                 </div>
-              )
-            : conversations.length === 0
-              ? sidebarOpen && (
-                  <div className="px-5 py-4">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      No conversations yet.
-                    </p>
-                    <button
-                      onClick={handleNewConversation}
-                      className="mt-2 text-sm font-medium underline underline-offset-4 decoration-foreground/40 hover:decoration-foreground"
-                    >
-                      Start the first one
-                    </button>
-                  </div>
-                )
-              : sidebarOpen && (
-                  <ul className="px-5 pt-1 pb-4">
-                    {conversations.map(conv => {
-                      const active = currentConversationId === conv.id;
-                      return (
-                        <li key={conv.id}>
-                          <button
-                            onClick={() => handleSelectConversation(conv.id)}
-                            className={cn(
-                              'group w-full flex items-baseline gap-2 py-2 text-left transition-colors',
-                              active
-                                ? 'text-foreground'
-                                : 'text-muted-foreground hover:text-foreground'
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                'flex-1 truncate text-sm',
-                                active && 'font-medium'
-                              )}
-                            >
-                              {conv.title || 'Untitled'}
-                            </span>
-                            {active && (
-                              <span className="h-1 w-1 bg-primary shrink-0 self-center" />
-                            )}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+              ) : conversations.length === 0 ? (
+                <div className="px-6 py-3">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    No conversations yet.
+                  </p>
+                  <button
+                    onClick={handleNewConversation}
+                    className="mt-2 text-sm font-medium text-foreground hover:underline underline-offset-4"
+                  >
+                    Start the first one
+                  </button>
+                </div>
+              ) : (
+                <ul className="px-3 pb-4 space-y-0.5">
+                  {conversations.map(conv => {
+                    const active = currentConversationId === conv.id;
+                    return (
+                      <li key={conv.id}>
+                        <button
+                          onClick={() => handleSelectConversation(conv.id)}
+                          className={cn(rowClass(active), 'px-3 h-9 text-left')}
+                        >
+                          <span className="flex-1 truncate">
+                            {conv.title || 'Untitled'}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </>
+          )}
         </div>
 
         {/* User footer */}
-        <div className="border-t border-border">
+        <div className={cn('shrink-0', sidebarOpen ? 'p-3' : 'p-2')}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 className={cn(
-                  'w-full flex items-center transition-colors hover:bg-muted',
-                  sidebarOpen ? 'gap-3 px-5 py-4' : 'justify-center py-4'
+                  'w-full flex items-center rounded-xl transition-colors hover:bg-muted/60',
+                  sidebarOpen ? 'gap-3 px-3 py-2.5' : 'justify-center py-2.5'
                 )}
               >
-                <div className="h-7 w-7 bg-foreground text-background flex items-center justify-center text-xs font-semibold shrink-0">
+                <div className="h-8 w-8 rounded-full bg-muted text-foreground flex items-center justify-center text-xs font-semibold shrink-0">
                   {(user?.fullName || user?.email || 'U')
                     .charAt(0)
                     .toUpperCase()}
@@ -278,21 +262,17 @@ export function Sidebar() {
                 )}
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-56 border-border bg-popover"
-              style={{ borderRadius: 0 }}
-            >
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem
                 onClick={() => router.push('/settings')}
-                className="cursor-pointer rounded-none focus:bg-muted"
+                className="cursor-pointer"
               >
                 <Settings className="mr-2 h-4 w-4" strokeWidth={1.75} />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={toggleTheme}
-                className="cursor-pointer rounded-none focus:bg-muted"
+                className="cursor-pointer"
               >
                 {theme === 'dark' ? (
                   <Sun className="mr-2 h-4 w-4" strokeWidth={1.75} />
@@ -301,10 +281,10 @@ export function Sidebar() {
                 )}
                 {theme === 'dark' ? 'Light mode' : 'Dark mode'}
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="cursor-pointer rounded-none text-destructive focus:bg-muted focus:text-destructive"
+                className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" strokeWidth={1.75} />
                 Logout

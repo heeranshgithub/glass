@@ -31,7 +31,7 @@ export function WaitlistFormCard({
           <h2 className="display-md leading-none">
             You&rsquo;re
             <br />
-            on the list<span className="text-primary">.</span>
+            on the list
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -56,7 +56,7 @@ export function WaitlistFormCard({
         <h2 className="display-md leading-none">
           Join the
           <br />
-          waitlist<span className="text-primary">.</span>
+          waitlist
         </h2>
       </div>
 

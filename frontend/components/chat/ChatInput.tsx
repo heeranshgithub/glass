@@ -45,25 +45,25 @@ export function ChatInput({
   const canSend = input.trim().length > 0 && !isLoading && !disabled;
 
   return (
-    <div className="border-t border-border bg-background">
+    <div>
       <form
         onSubmit={handleSubmit}
-        className="w-full px-2.5 sm:px-3.5 py-2 sm:py-2.5"
+        className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-4 pt-2"
       >
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-2 rounded-[26px] border border-border bg-muted/50 pl-5 pr-2 py-2 transition-colors focus-within:border-input">
           <div className="flex-1 min-w-0">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask the council—"
+              placeholder="Ask the council anything"
               disabled={isLoading || disabled}
               className={cn(
-                'min-h-[40px] max-h-[200px] resize-none border-0 bg-transparent shadow-none',
-                'rounded-none px-0 py-1 text-base leading-relaxed',
-                'focus-visible:ring-0 focus-visible:ring-offset-0',
-                'placeholder:text-muted-foreground/50'
+                'min-h-[36px] max-h-[200px] resize-none border-0 bg-transparent shadow-none dark:bg-transparent',
+                'rounded-none px-0 py-1.5 text-base leading-relaxed',
+                'focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0',
+                'placeholder:text-muted-foreground/70'
               )}
               rows={1}
             />
@@ -74,9 +74,9 @@ export function ChatInput({
             disabled={!canSend}
             aria-label="Send message"
             className={cn(
-              'h-10 w-10 shrink-0 flex items-center justify-center transition-colors',
+              'h-9 w-9 shrink-0 flex items-center justify-center rounded-full transition-colors',
               canSend
-                ? 'bg-foreground text-background hover:bg-primary'
+                ? 'bg-foreground text-background hover:bg-foreground/85'
                 : 'bg-muted text-muted-foreground cursor-not-allowed'
             )}
           >
@@ -86,16 +86,6 @@ export function ChatInput({
               <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
             )}
           </button>
-        </div>
-
-        <div className="flex items-baseline justify-between mt-1.5 gap-2">
-          <span className="mono-label">
-            01 · responses → 02 · rankings → 03 · synthesis
-          </span>
-          <span className="mono-label hidden sm:inline">
-            <kbd className="font-mono">↵</kbd> send ·{' '}
-            <kbd className="font-mono">⇧↵</kbd> new line
-          </span>
         </div>
       </form>
     </div>

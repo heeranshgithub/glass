@@ -19,7 +19,7 @@ export function WaitlistDesktop(props: Props) {
       <div className="bg-foreground text-background p-12 flex flex-col justify-between">
         <div className="flex items-baseline justify-between">
           <span className="text-2xl font-bold tracking-tighter">Glass</span>
-          <span className="mono-label text-background/60 flex items-center gap-2">
+          <span className="mono-label text-background/75 flex items-center gap-2">
             <span className="h-1.5 w-1.5 bg-primary" />
             Live · Waitlist to scale
           </span>
@@ -30,9 +30,8 @@ export function WaitlistDesktop(props: Props) {
             Questions
             <br />
             that matter
-            <span className="text-primary">.</span>
           </h1>
-          <p className="text-base text-background/70 max-w-md leading-relaxed">
+          <p className="text-base text-background/85 max-w-md leading-relaxed">
             You ask. A council of models answers. They rank each other. An
             arbiter synthesises the best parts into one response.
           </p>
@@ -47,8 +46,8 @@ export function WaitlistDesktop(props: Props) {
                 <div className="text-3xl font-semibold tabular-nums leading-none">
                   {s.n}
                 </div>
-                <div className="mono-label text-background/60">{s.label}</div>
-                <div className="text-xs text-background/70 leading-relaxed pt-1">
+                <div className="mono-label text-background/75">{s.label}</div>
+                <div className="text-xs text-background/85 leading-relaxed pt-1">
                   {s.body}
                 </div>
               </div>
@@ -56,7 +55,7 @@ export function WaitlistDesktop(props: Props) {
           </div>
         </div>
 
-        <div className="flex items-baseline justify-between mono-label text-background/50">
+        <div className="flex items-baseline justify-between mono-label text-background/70">
           <span>© {new Date().getFullYear()} Glass</span>
           <span>Production-ready LLM infrastructure</span>
         </div>
