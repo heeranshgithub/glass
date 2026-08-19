@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useLoginMutation } from '@/lib/store';
 import { useAppDispatch } from '@/lib/store';
 import { setTokens } from '@/lib/store';
@@ -46,7 +45,7 @@ export default function LoginPage() {
       <div className="space-y-2">
         <h2 className="text-3xl font-semibold tracking-tight">Welcome back</h2>
         <p className="text-sm text-muted-foreground">
-          Sign in to continue routing prompts through your model council.
+          Sign in to continue routing prompts through our model council.
         </p>
       </div>
 
@@ -106,17 +105,16 @@ export default function LoginPage() {
           )}
         </Button>
 
-        {process.env.NODE_ENV !== 'production' && (
-          <p className="text-sm text-muted-foreground">
-            Don&rsquo;t have an account?{' '}
-            <Link
-              href="/register"
-              className="text-foreground font-medium underline underline-offset-4 decoration-foreground/40 hover:decoration-foreground"
-            >
-              Create one
-            </Link>
-          </p>
-        )}
+        <Button
+          type="button"
+          variant="secondary"
+          size="lg"
+          className="w-full"
+          onClick={() => router.push('/demo')}
+          disabled={isLoading}
+        >
+          Try the demo
+        </Button>
       </form>
     </div>
   );
