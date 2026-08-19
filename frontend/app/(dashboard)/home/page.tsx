@@ -6,7 +6,6 @@ import {
   useCreateConversationMutation,
   setCurrentConversationId,
   useGetCouncilHealthQuery,
-  useGetCurrentUserQuery,
 } from '@/lib/store';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
@@ -15,10 +14,7 @@ export default function HomePage() {
   const dispatch = useAppDispatch();
   const [createConversation, { isLoading: isCreating }] =
     useCreateConversationMutation();
-  const { data: health, isLoading: isLoadingHealth } =
-    useGetCouncilHealthQuery();
-  const { data: user, isLoading: isLoadingUser } = useGetCurrentUserQuery();
-  const isDemo = user?.isDemo === true;
+  const { data: health } = useGetCouncilHealthQuery();
 
   const handleNewConversation = async () => {
     try {
@@ -95,7 +91,7 @@ export default function HomePage() {
           className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-up"
           style={{ animationDelay: '200ms' }}
         >
-          {stages.map((stage, i) => (
+          {stages.map(stage => (
             <article
               key={stage.n}
               className="rounded-2xl bg-muted/50 p-6 transition-colors hover:bg-muted"
@@ -123,30 +119,9 @@ export default function HomePage() {
           className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 animate-fade-up"
           style={{ animationDelay: '400ms' }}
         >
-          <div className="lg:col-span-3 space-y-4">
-            <h2 className="text-xs text-muted-foreground">System status</h2>
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-3 w-3">
-                <span
-                  className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-50 ${health?.openrouterConfigured || isDemo ? 'bg-primary' : 'bg-destructive'}`}
-                ></span>
-                <span
-                  className={`relative inline-flex h-3 w-3 rounded-full ${health?.openrouterConfigured || isDemo ? 'bg-primary' : 'bg-destructive'}`}
-                ></span>
-              </div>
-              <span className="text-sm font-medium">
-                {isLoadingHealth || isLoadingUser
-                  ? 'Checking...'
-                  : health?.openrouterConfigured || isDemo
-                    ? 'All systems operational'
-                    : 'OpenRouter not configured'}
-              </span>
-            </div>
-          </div>
-
           {health && (
             <>
-              <div className="lg:col-span-6 space-y-4">
+              <div className="lg:col-span-8 space-y-4">
                 <h2 className="text-xs text-muted-foreground">
                   Active council models
                 </h2>
@@ -166,7 +141,7 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
-              <div className="lg:col-span-3 space-y-4">
+              <div className="lg:col-span-4 space-y-4">
                 <h2 className="text-xs text-muted-foreground">Arbiter model</h2>
                 <div className="p-3 rounded-xl bg-foreground text-background">
                   <span className="text-sm font-mono block truncate">
