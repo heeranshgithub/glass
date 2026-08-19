@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   useAppDispatch,
@@ -60,6 +61,7 @@ export function Sidebar() {
   const [createConversation, { isLoading: isCreating }] =
     useCreateConversationMutation();
   const [deleteConversation] = useDeleteConversationMutation();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const conversations = conversationsData?.conversations ?? [];
 
@@ -87,6 +89,7 @@ export function Sidebar() {
     // The menu item is disabled too, but that only blocks real pointer input;
     // the server refuses demo deletes regardless.
     if (!canDelete) return;
+    setDeleteError(null);
     try {
       await deleteConversation(id).unwrap();
       // Leaving the user on a deleted thread would 404.
@@ -95,7 +98,15 @@ export function Sidebar() {
         router.push('/home');
       }
     } catch (error) {
-      console.error('Failed to delete conversation:', error);
+      // RTK Query rejects with { status, data }, which has no `message` and so
+      // logs as `{}`. Pull the API's detail out so the failure is readable.
+      const err = error as {
+        status?: number | string;
+        data?: { detail?: string };
+      };
+      const detail = err?.data?.detail ?? 'Could not delete the conversation.';
+      console.error('Failed to delete conversation:', err?.status, detail);
+      setDeleteError(detail);
     }
   };
 
@@ -227,6 +238,14 @@ export function Sidebar() {
               <div className="px-6 pb-2 text-xs text-muted-foreground">
                 Chats
               </div>
+
+              {deleteError && (
+                <div className="mx-3 mb-2 rounded-lg bg-destructive/10 px-3 py-2">
+                  <p className="text-xs leading-relaxed text-destructive">
+                    {deleteError}
+                  </p>
+                </div>
+              )}
 
               {isLoadingConversations ? (
                 <div className="px-6 py-3">
