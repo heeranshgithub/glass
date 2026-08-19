@@ -15,7 +15,7 @@ export default function RootPage() {
       if (isAuthenticated) {
         router.replace('/home');
       } else {
-        router.replace('/demo');
+        router.replace('/login');
       }
     }
   }, [isAuthenticated, isInitialized, router]);

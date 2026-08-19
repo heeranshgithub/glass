@@ -44,7 +44,9 @@ function SectionHeader({
 
   return (
     <header className="grid grid-cols-[2.5rem_1fr] gap-3 items-baseline">
-      <span className="mono-label tabular-nums">{number}</span>
+      <span className="text-xs tabular-nums text-muted-foreground">
+        {number}
+      </span>
       {titleBlock}
     </header>
   );
@@ -58,12 +60,12 @@ function SectionBody({
   numbered?: boolean;
 }) {
   if (!numbered) {
-    return <div className="space-y-4 max-w-xl">{children}</div>;
+    return <div className="space-y-3 max-w-xl">{children}</div>;
   }
   return (
     <div className="grid grid-cols-[2.5rem_1fr] gap-3">
       <div />
-      <div className="space-y-4 max-w-xl">{children}</div>
+      <div className="space-y-3 max-w-xl">{children}</div>
     </div>
   );
 }
@@ -212,7 +214,7 @@ export default function SettingsPage() {
       <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center gap-3">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          <span className="mono-label">Loading settings</span>
+          <span>Loading settings</span>
         </div>
       </div>
     );
@@ -223,46 +225,34 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 overflow-auto">
-      <div className="max-w-4xl mx-auto px-2 sm:px-3 py-6 lg:py-10">
-        <div className="flex items-baseline justify-between mb-4">
-          <span className="mono-label">{user?.email}</span>
-        </div>
-        <div className="swiss-rule-strong mb-8" />
-
-        <div className="grid grid-cols-12 gap-5 lg:gap-6 mb-8 lg:mb-10">
-          <div className="col-span-12 lg:col-span-8">
-            <h1 className="display-lg leading-none">Settings</h1>
-          </div>
-          <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Manage your account, appearance and integrations.
-            </p>
-          </div>
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage your account and appearance.
+          </p>
         </div>
 
         {error && (
           <div
-            className="border-l-2 border-destructive pl-3 py-1 mb-6 text-sm text-destructive"
+            className="rounded-xl bg-destructive/10 px-3.5 py-2.5 mb-6 text-sm text-destructive"
             role="alert"
           >
             {error}
           </div>
         )}
 
-        <div className="space-y-10 lg:space-y-12">
+        <div className="space-y-8">
           {/* Profile */}
-          <section className="space-y-4">
+          <section className="space-y-3">
             <SectionHeader
               title="Profile"
               description="Your personal information."
             />
-            <div className="swiss-rule" />
             <SectionBody numbered={false}>
               <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="mono-label">
-                    Email
-                  </Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -275,9 +265,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="fullName" className="mono-label">
-                    Full name
-                  </Label>
+                  <Label htmlFor="fullName">Full name</Label>
                   <Input
                     id="fullName"
                     value={profileForm.fullName || user?.fullName || ''}
@@ -297,9 +285,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="username" className="mono-label">
-                    Username
-                  </Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
                     id="username"
                     value={profileForm.username || user?.username || ''}
@@ -314,7 +300,7 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 pt-2 mono-label">
+                <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 pt-2 text-xs text-muted-foreground">
                   <span>
                     Created{' '}
                     {user?.createdAt
@@ -349,12 +335,11 @@ export default function SettingsPage() {
           </section>
 
           {/* Appearance */}
-          <section className="space-y-4">
+          <section className="space-y-3">
             <SectionHeader
               title="Appearance"
               description="How Glass looks on your device."
             />
-            <div className="swiss-rule" />
             <SectionBody numbered={false}>
               <div className="grid grid-cols-3 gap-3">
                 {themes.map(({ value, label, icon: Icon }) => (
@@ -362,10 +347,10 @@ export default function SettingsPage() {
                     key={value}
                     onClick={() => dispatch(setTheme(value))}
                     className={cn(
-                      'flex flex-col items-start gap-2 p-3 border transition-colors text-left',
+                      'flex flex-col items-start gap-2 rounded-2xl p-4 transition-colors text-left',
                       theme === value
-                        ? 'border-foreground bg-foreground text-background'
-                        : 'border-border hover:border-foreground'
+                        ? 'bg-foreground text-background'
+                        : 'bg-muted/50 hover:bg-muted'
                     )}
                   >
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
@@ -378,19 +363,16 @@ export default function SettingsPage() {
 
           {/* Password */}
           {!isDemo && (
-            <section className="space-y-4">
+            <section className="space-y-3">
               <SectionHeader
                 number={nextNumber()}
                 title="Password"
                 description="Change the password used to sign in."
               />
-              <div className="swiss-rule" />
               <SectionBody>
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="currentPassword" className="mono-label">
-                      Current password
-                    </Label>
+                    <Label htmlFor="currentPassword">Current password</Label>
                     <Input
                       id="currentPassword"
                       type="password"
@@ -405,9 +387,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="newPassword" className="mono-label">
-                      New password
-                    </Label>
+                    <Label htmlFor="newPassword">New password</Label>
                     <Input
                       id="newPassword"
                       type="password"
@@ -422,7 +402,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="confirmPassword" className="mono-label">
+                    <Label htmlFor="confirmPassword">
                       Confirm new password
                     </Label>
                     <Input
@@ -462,22 +442,21 @@ export default function SettingsPage() {
 
           {/* API Key */}
           {!isDemo && (
-            <section className="space-y-4">
+            <section className="space-y-3">
               <SectionHeader
                 number={nextNumber()}
                 title="OpenRouter API key"
                 description="Required to use the council. Encrypted at rest."
               />
-              <div className="swiss-rule" />
               <SectionBody>
                 {user?.hasOpenRouterKey || isDemo ? (
-                  <p className="mono-label flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 bg-foreground" />
+                  <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
                     Configured
                   </p>
                 ) : (
-                  <p className="mono-label flex items-center gap-2 text-primary">
-                    <span className="h-1.5 w-1.5 bg-primary" />
+                  <p className="flex items-center gap-2 text-xs text-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-foreground" />
                     Not configured
                   </p>
                 )}
@@ -490,7 +469,7 @@ export default function SettingsPage() {
                   className="space-y-4"
                 >
                   <div className="space-y-1.5">
-                    <Label htmlFor="apiKey" className="mono-label">
+                    <Label htmlFor="apiKey">
                       {user?.hasOpenRouterKey ? 'Update key' : 'API key'}
                     </Label>
                     <Input
@@ -575,13 +554,12 @@ export default function SettingsPage() {
 
           {/* Admin */}
           {isAdmin && (
-            <section className="space-y-4">
+            <section className="space-y-3">
               <SectionHeader
                 number={nextNumber()}
                 title="Admin"
                 description="Manage demo account settings."
               />
-              <div className="swiss-rule" />
               <SectionBody>
                 <div className="flex items-baseline justify-between gap-6">
                   <div>
@@ -618,13 +596,12 @@ export default function SettingsPage() {
 
           {/* Security */}
           {!isDemo && (
-            <section className="space-y-4">
+            <section className="space-y-3">
               <SectionHeader
                 number={nextNumber()}
                 title="Security"
                 description="Manage your active sessions."
               />
-              <div className="swiss-rule" />
               <SectionBody>
                 <div className="flex items-baseline justify-between gap-6">
                   <div>

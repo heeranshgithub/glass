@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useGetLeaderboardQuery } from '@/lib/store/api';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ModelLeaderboardEntry } from '@/lib/types';
 
@@ -16,54 +16,50 @@ function ModelScoreboardTable({ models }: { models: ModelLeaderboardEntry[] }) {
   }
 
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="text-left">
-          <th className="mono-label font-normal py-1.5 pr-3 w-12">Rank</th>
-          <th className="mono-label font-normal py-1.5 pr-3">Model</th>
-          <th className="mono-label font-normal py-1.5 pr-3 text-right tabular-nums">
-            Avg
-          </th>
-          <th className="mono-label font-normal py-1.5 pr-3 text-right tabular-nums">
-            Total
-          </th>
-          <th className="mono-label font-normal py-1.5 text-right tabular-nums">
-            Appearances
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {models.map(model => (
-          <tr
-            key={model.model}
-            className={cn(
-              'border-t border-border transition-colors hover:bg-muted/50',
-              model.rank === 1 && 'font-semibold'
-            )}
-          >
-            <td className="py-2 pr-3 tabular-nums">
-              {model.rank === 1 ? (
-                <span className="text-primary">
-                  {String(model.rank).padStart(2, '0')}
-                </span>
-              ) : (
-                String(model.rank).padStart(2, '0')
-              )}
-            </td>
-            <td className="py-2 pr-3 font-mono">{model.model}</td>
-            <td className="py-2 pr-3 text-right tabular-nums">
-              {model.avgScore.toFixed(2)}
-            </td>
-            <td className="py-2 pr-3 text-right tabular-nums text-muted-foreground">
-              {model.totalScore.toFixed(1)}
-            </td>
-            <td className="py-2 text-right tabular-nums text-muted-foreground">
-              {model.appearances}
-            </td>
+    <div className="overflow-x-auto rounded-2xl bg-muted/40">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-xs text-muted-foreground">
+            <th className="font-normal py-3 pl-5 pr-3 w-14">Rank</th>
+            <th className="font-normal py-3 pr-3">Model</th>
+            <th className="font-normal py-3 pr-3 text-right tabular-nums">
+              Avg
+            </th>
+            <th className="font-normal py-3 pr-3 text-right tabular-nums">
+              Total
+            </th>
+            <th className="font-normal py-3 pr-5 text-right tabular-nums">
+              Appearances
+            </th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {models.map(model => (
+            <tr
+              key={model.model}
+              className={cn(
+                'transition-colors hover:bg-muted/70',
+                model.rank === 1 && 'font-semibold'
+              )}
+            >
+              <td className="py-3 pl-5 pr-3 tabular-nums text-muted-foreground">
+                {model.rank}
+              </td>
+              <td className="py-3 pr-3 font-mono">{model.model}</td>
+              <td className="py-3 pr-3 text-right tabular-nums">
+                {model.avgScore.toFixed(2)}
+              </td>
+              <td className="py-3 pr-3 text-right tabular-nums text-muted-foreground">
+                {model.totalScore.toFixed(1)}
+              </td>
+              <td className="py-3 pr-5 text-right tabular-nums text-muted-foreground">
+                {model.appearances}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -73,16 +69,17 @@ export default function LeaderboardPage() {
     data: leaderboard,
     isLoading,
     error,
-    refetch,
-    isFetching,
-  } = useGetLeaderboardQuery();
+    // Refetch on arrival instead of offering a manual refresh control.
+  } = useGetLeaderboardQuery(undefined, { refetchOnMountOrArgChange: true });
 
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center gap-3">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          <span className="mono-label">Loading leaderboard</span>
+          <span className="text-sm text-muted-foreground">
+            Loading leaderboard
+          </span>
         </div>
       </div>
     );
@@ -105,29 +102,11 @@ export default function LeaderboardPage() {
   return (
     <div className="flex-1 overflow-auto">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 lg:py-10">
-        {/* Header */}
-        <div className="flex items-baseline justify-between mb-4">
-          <button
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-          >
-            <RefreshCw
-              className={cn(
-                'h-3.5 w-3.5 transition-transform group-hover:rotate-180 duration-500',
-                isFetching && 'animate-spin'
-              )}
-              strokeWidth={1.75}
-            />
-            <span>Refresh</span>
-          </button>
-        </div>
-
-        <div className="swiss-rule-strong mb-6" />
-
         <div className="grid grid-cols-12 gap-5 lg:gap-6 mb-8">
           <div className="col-span-12 lg:col-span-8">
-            <h1 className="display-lg leading-none">Model Scoreboard</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Model Scoreboard
+            </h1>
           </div>
           <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end">
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -138,7 +117,7 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Category tabs */}
-        <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2 mb-4">
+        <div className="flex flex-wrap items-center gap-1.5 mb-4">
           {tabs.map(tab => {
             const active = activeTab === tab;
             return (
@@ -146,10 +125,10 @@ export default function LeaderboardPage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'text-sm transition-colors capitalize',
+                  'rounded-full px-3.5 py-1.5 text-sm transition-colors capitalize',
                   active
-                    ? 'text-foreground font-medium border-b border-primary pb-0.5'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-muted text-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                 )}
               >
                 {tab === 'overall' ? 'Overall' : tab}
@@ -157,8 +136,6 @@ export default function LeaderboardPage() {
             );
           })}
         </div>
-
-        <div className="swiss-rule mb-2" />
 
         <ModelScoreboardTable models={currentModels} />
       </div>

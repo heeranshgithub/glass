@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { setTheme } from '@/lib/store/slices/uiSlice';
+import { useResolvedTheme } from '@/lib/useResolvedTheme';
 
 export function Sidebar() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export function Sidebar() {
   const currentConversationId = useAppSelector(
     state => state.ui.currentConversationId
   );
-  const theme = useAppSelector(state => state.ui.theme);
+  const resolvedTheme = useResolvedTheme();
 
   const { data: conversationsData, isLoading: isLoadingConversations } =
     useListConversationsQuery();
@@ -73,7 +74,7 @@ export function Sidebar() {
   };
 
   const toggleTheme = () => {
-    dispatch(setTheme(theme === 'dark' ? 'light' : 'dark'));
+    dispatch(setTheme(resolvedTheme === 'dark' ? 'light' : 'dark'));
   };
 
   const navItems = [
@@ -274,12 +275,12 @@ export function Sidebar() {
                 onClick={toggleTheme}
                 className="cursor-pointer"
               >
-                {theme === 'dark' ? (
+                {resolvedTheme === 'dark' ? (
                   <Sun className="mr-2 h-4 w-4" strokeWidth={1.75} />
                 ) : (
                   <Moon className="mr-2 h-4 w-4" strokeWidth={1.75} />
                 )}
-                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                {resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

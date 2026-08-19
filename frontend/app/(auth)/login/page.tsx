@@ -88,6 +88,7 @@ export default function LoginPage() {
 
         <Button
           type="submit"
+          variant="secondary"
           size="lg"
           className="w-full group transition-all"
           disabled={isLoading}
@@ -105,16 +106,27 @@ export default function LoginPage() {
           )}
         </Button>
 
-        <Button
-          type="button"
-          variant="secondary"
-          size="lg"
-          className="w-full"
-          onClick={() => router.push('/demo')}
-          disabled={isLoading}
-        >
-          Try the demo
-        </Button>
+        <div className="flex items-center gap-3 pt-1">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="space-y-2">
+          <Button
+            type="button"
+            size="lg"
+            className="w-full group transition-all"
+            onClick={() => router.push('/demo')}
+            disabled={isLoading}
+          >
+            Try the demo
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            No account needed — full access to the council
+          </p>
+        </div>
       </form>
     </div>
   );
