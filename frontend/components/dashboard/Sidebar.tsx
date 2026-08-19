@@ -35,6 +35,11 @@ import {
   ExternalLink,
   Trash2,
 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { setTheme } from '@/lib/store/slices/uiSlice';
 import { useResolvedTheme } from '@/lib/useResolvedTheme';
@@ -283,30 +288,45 @@ export function Sidebar() {
                               />
                               Open new tab
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteConversation(conv.id)}
-                              disabled={!canDelete}
-                              variant={canDelete ? 'destructive' : 'default'}
-                              className={cn(
-                                'cursor-pointer',
-                                // Faded red reads as a rendering glitch; plain
-                                // muted grey reads as "unavailable". Keep it at
-                                // full opacity so the reason stays legible.
-                                !canDelete &&
-                                  'cursor-not-allowed text-muted-foreground data-[disabled]:opacity-100'
-                              )}
-                            >
-                              <Trash2
-                                className="mr-2 h-4 w-4"
-                                strokeWidth={1.75}
-                              />
-                              Delete
-                              {!canDelete && (
-                                <span className="ml-auto text-xs text-muted-foreground">
-                                  Demo
-                                </span>
-                              )}
-                            </DropdownMenuItem>
+                            {canDelete ? (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDeleteConversation(conv.id)
+                                }
+                                variant="destructive"
+                                className="cursor-pointer"
+                              >
+                                <Trash2
+                                  className="mr-2 h-4 w-4"
+                                  strokeWidth={1.75}
+                                />
+                                Delete
+                              </DropdownMenuItem>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  {/* A disabled item gets pointer-events:none,
+                                      so hover can never reach it. The wrapper
+                                      receives the hover instead. */}
+                                  <span className="block">
+                                    <DropdownMenuItem
+                                      disabled
+                                      className="cursor-not-allowed text-muted-foreground data-[disabled]:opacity-100"
+                                    >
+                                      <Trash2
+                                        className="mr-2 h-4 w-4"
+                                        strokeWidth={1.75}
+                                      />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="right">
+                                  Deleting is turned off on the shared demo
+                                  account
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </li>

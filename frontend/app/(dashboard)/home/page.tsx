@@ -58,7 +58,7 @@ export default function HomePage() {
             </h1>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground max-w-2xl">
               Harness the collective intelligence of multiple AI models through
-              a rigorous three-stage evaluation process.
+              a three-stage evaluation process.
             </p>
           </div>
 
