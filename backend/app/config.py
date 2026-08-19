@@ -74,6 +74,9 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 # Demo and Admin Configuration
 DEMO_EMAIL = os.getenv("DEMO_EMAIL", "")
+# The demo account is shared by every visitor, so destructive actions on it are
+# refused unless a deployment explicitly opts in (local development does).
+ALLOW_DEMO_DELETE = os.getenv("ALLOW_DEMO_DELETE", "false").lower() == "true"
 DEMO_PASS = os.getenv("DEMO_PASS", "")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "")
 

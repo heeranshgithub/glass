@@ -12,6 +12,7 @@ from services.conversation_service import ConversationService
 from services.council_service import CouncilService
 from services.rate_limit_service import RateLimitService
 from api.users import get_user_openrouter_key
+from app.config import DEMO_EMAIL, ALLOW_DEMO_DELETE
 from models.user import UserInDB
 from schemas.conversation import (
     CreateConversationRequest,
@@ -143,9 +144,20 @@ async def delete_conversation(
 ):
     """
     Delete a conversation.
-    
-    Verifies that the conversation belongs to the current user.
+
+    Verifies that the conversation belongs to the current user, and refuses
+    deletion on the shared demo account unless the deployment opts in.
     """
+    if (
+        DEMO_EMAIL
+        and current_user.email == DEMO_EMAIL
+        and not ALLOW_DEMO_DELETE
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Deleting conversations is disabled on the demo account.",
+        )
+
     conv_service = ConversationService(db)
     
     deleted = await conv_service.delete_conversation(

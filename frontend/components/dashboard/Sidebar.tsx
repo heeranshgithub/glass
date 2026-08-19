@@ -9,6 +9,7 @@ import {
   logout,
   useListConversationsQuery,
   useCreateConversationMutation,
+  useDeleteConversationMutation,
   useGetCurrentUserQuery,
 } from '@/lib/store';
 import { Button } from '@/components/ui/button';
@@ -21,8 +22,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Plus,
-  PanelLeftClose,
-  PanelLeftOpen,
+  ChevronsLeft,
+  ChevronsRight,
   Settings,
   LogOut,
   Sun,
@@ -30,6 +31,9 @@ import {
   Trophy,
   Home,
   Loader2,
+  MoreHorizontal,
+  ExternalLink,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { setTheme } from '@/lib/store/slices/uiSlice';
@@ -50,6 +54,7 @@ export function Sidebar() {
   const { data: user } = useGetCurrentUserQuery();
   const [createConversation, { isLoading: isCreating }] =
     useCreateConversationMutation();
+  const [deleteConversation] = useDeleteConversationMutation();
 
   const conversations = conversationsData?.conversations ?? [];
 
@@ -66,6 +71,27 @@ export function Sidebar() {
   const handleSelectConversation = (id: string) => {
     dispatch(setCurrentConversationId(id));
     router.push(`/chat/${id}`);
+  };
+
+  // The demo account is shared, so one visitor must not be able to wipe the
+  // conversations everyone else sees. Local dev is exempt for convenience.
+  const isDemo = user?.isDemo === true;
+  const canDelete = !isDemo || process.env.NODE_ENV === 'development';
+
+  const handleDeleteConversation = async (id: string) => {
+    // The menu item is disabled too, but that only blocks real pointer input;
+    // the server refuses demo deletes regardless.
+    if (!canDelete) return;
+    try {
+      await deleteConversation(id).unwrap();
+      // Leaving the user on a deleted thread would 404.
+      if (currentConversationId === id || pathname === `/chat/${id}`) {
+        dispatch(setCurrentConversationId(null));
+        router.push('/home');
+      }
+    } catch (error) {
+      console.error('Failed to delete conversation:', error);
+    }
   };
 
   const handleLogout = () => {
@@ -127,7 +153,7 @@ export function Sidebar() {
                 className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
                 aria-label="Collapse sidebar"
               >
-                <PanelLeftClose className="h-4 w-4" />
+                <ChevronsLeft className="h-4 w-4" />
               </button>
             </>
           ) : (
@@ -136,7 +162,7 @@ export function Sidebar() {
               className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
               aria-label="Expand sidebar"
             >
-              <PanelLeftOpen className="h-4 w-4" />
+              <ChevronsRight className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -218,15 +244,71 @@ export function Sidebar() {
                   {conversations.map(conv => {
                     const active = currentConversationId === conv.id;
                     return (
-                      <li key={conv.id}>
+                      <li key={conv.id} className="group/row relative">
                         <button
                           onClick={() => handleSelectConversation(conv.id)}
                           className={cn(rowClass(active), 'px-3 h-9 text-left')}
                         >
-                          <span className="flex-1 truncate">
+                          <span className="flex-1 truncate pr-6">
                             {conv.title || 'Untitled'}
                           </span>
                         </button>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              aria-label={`Options for ${conv.title || 'Untitled'}`}
+                              className={cn(
+                                'absolute right-1 top-1/2 -translate-y-1/2',
+                                'flex h-7 w-7 items-center justify-center rounded-lg',
+                                'text-muted-foreground transition-colors',
+                                'hover:bg-muted hover:text-foreground',
+                                'opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100',
+                                'data-[state=open]:opacity-100 data-[state=open]:bg-muted'
+                              )}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-48">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                window.open(`/chat/${conv.id}`, '_blank')
+                              }
+                              className="cursor-pointer"
+                            >
+                              <ExternalLink
+                                className="mr-2 h-4 w-4"
+                                strokeWidth={1.75}
+                              />
+                              Open new tab
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteConversation(conv.id)}
+                              disabled={!canDelete}
+                              variant={canDelete ? 'destructive' : 'default'}
+                              className={cn(
+                                'cursor-pointer',
+                                // Faded red reads as a rendering glitch; plain
+                                // muted grey reads as "unavailable". Keep it at
+                                // full opacity so the reason stays legible.
+                                !canDelete &&
+                                  'cursor-not-allowed text-muted-foreground data-[disabled]:opacity-100'
+                              )}
+                            >
+                              <Trash2
+                                className="mr-2 h-4 w-4"
+                                strokeWidth={1.75}
+                              />
+                              Delete
+                              {!canDelete && (
+                                <span className="ml-auto text-xs text-muted-foreground">
+                                  Demo
+                                </span>
+                              )}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </li>
                     );
                   })}
@@ -302,7 +384,7 @@ export function Sidebar() {
         className="fixed top-3 left-3 z-30 lg:hidden"
         onClick={() => dispatch(toggleSidebar())}
       >
-        <PanelLeftOpen className="h-4 w-4" />
+        <ChevronsRight className="h-4 w-4" />
       </Button>
     </>
   );
