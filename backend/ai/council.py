@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import List, Dict, Any, Tuple, Optional, AsyncGenerator
 
 from ai.openrouter import query_models_parallel, query_model, query_models_parallel_stream, query_model_stream
-from ai.config import COUNCIL_MODELS, ARBITER_MODEL, TITLE_MODEL
+from ai.config import COUNCIL_MODELS, ARBITER_MODEL, TITLE_MODEL, CATEGORY_MODEL
 from schemas.conversation import (
     ModelResponseSchema,
     ModelRankingSchema,
@@ -323,8 +323,7 @@ Respond with ONLY the exact category name from the list above (e.g., "Business &
 
     messages = [{"role": "user", "content": category_prompt}]
 
-    # Use gemini-2.5-pro for categorization
-    response = await query_model("google/gemini-2.5-pro", messages, api_key, timeout=30.0)
+    response = await query_model(CATEGORY_MODEL, messages, api_key, timeout=30.0)
 
     if response is None:
         return None

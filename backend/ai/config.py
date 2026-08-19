@@ -16,3 +16,7 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Model for title generation (fast and cheap)
 TITLE_MODEL = "google/gemini-2.5-flash"
+
+# Model for classifying a query into a leaderboard category.
+# One-word classification, so the cheap fast model is the right tool.
+CATEGORY_MODEL = "google/gemini-2.5-flash"
