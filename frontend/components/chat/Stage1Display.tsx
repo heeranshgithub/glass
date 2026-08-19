@@ -25,69 +25,42 @@ export function Stage1Display({ responses, isStreaming }: Stage1DisplayProps) {
 
   return (
     <section className="space-y-4">
-      <header className="grid grid-cols-[3rem_1fr_auto] gap-4 items-baseline">
-        <span className="mono-label tabular-nums">01</span>
-        <div>
-          <h2 className="display-md leading-none">Responses</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Each model&rsquo;s independent analysis.
-          </p>
-        </div>
-        <span className="mono-label tabular-nums">
-          {String(responses.length).padStart(2, '0')} / models
-        </span>
-      </header>
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Responses</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Each model&rsquo;s independent analysis.
+        </p>
+      </div>
 
-      <div className="swiss-rule" />
-
-      <div className="grid grid-cols-[3rem_1fr] gap-4">
-        <div />
-        <div className="space-y-4">
-          {/* Model tabs */}
-          <div className="flex flex-wrap gap-x-5 gap-y-1">
-            {responses.map((resp, index) => {
-              const active = activeTab === index;
-              return (
-                <button
-                  key={index}
-                  onClick={() => setActiveTab(index)}
-                  className={cn(
-                    'group inline-flex items-baseline gap-2 text-sm transition-colors',
-                    active
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <span className="mono-label tabular-nums">
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  <span
-                    className={cn(
-                      'font-mono',
-                      active && 'border-b border-primary pb-0.5'
-                    )}
-                  >
-                    {getModelShortName(resp?.model)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active response */}
-          <div>
-            <div className="mono-label mb-3">
-              {responses[activeTab]?.model || 'Unknown'}
-            </div>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>
-                {responses[activeTab]?.response || ''}
-              </ReactMarkdown>
-              {isStreaming && (
-                <span className="inline-block w-1.5 h-4 bg-primary animate-cursor ml-1 align-text-bottom" />
+      <div className="flex flex-wrap gap-1.5">
+        {responses.map((resp, index) => {
+          const active = activeTab === index;
+          return (
+            <button
+              key={index}
+              onClick={() => setActiveTab(index)}
+              className={cn(
+                'rounded-full px-3.5 py-1.5 text-sm transition-colors',
+                active
+                  ? 'bg-muted text-foreground font-medium'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
               )}
-            </div>
-          </div>
+            >
+              {getModelShortName(resp?.model)}
+            </button>
+          );
+        })}
+      </div>
+
+      <div>
+        <div className="text-xs text-muted-foreground mb-2">
+          {responses[activeTab]?.model || 'Unknown'}
+        </div>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <ReactMarkdown>{responses[activeTab]?.response || ''}</ReactMarkdown>
+          {isStreaming && (
+            <span className="inline-block w-1.5 h-4 bg-primary animate-cursor ml-1 align-text-bottom" />
+          )}
         </div>
       </div>
     </section>

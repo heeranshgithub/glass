@@ -50,16 +50,19 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  --radius-sm: 0px;
-  --radius-md: 1px;
-  --radius-lg: 2px;
-  --radius-xl: 2px;
-  --radius-2xl: 2px;
-  --radius-3xl: 2px;
-  --radius-4xl: 2px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
 }
 
 :root {
+  color-scheme: light;
+
+  /* Separation comes from soft filled shapes and spacing, not lines. */
   --background: oklch(1 0 0);
   --foreground: oklch(0.12 0 0);
 
@@ -69,19 +72,20 @@
   --popover-foreground: oklch(0.12 0 0);
 
   /* Primary = the one accent. Vignelli-style vermilion red. */
-  --primary: oklch(0.58 0.22 25);
+  --primary: oklch(0.54 0.09 190);
   --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.945 0 0);
   --secondary-foreground: oklch(0.12 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.945 0 0);
   --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.945 0 0);
   --accent-foreground: oklch(0.12 0 0);
-  --destructive: oklch(0.58 0.22 25);
+  --destructive: oklch(0.56 0.22 25);
 
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
+  /* border = whisper edge on fills; input = focused-control boundary. */
+  --border: oklch(0.885 0 0);
+  --input: oklch(0.72 0 0);
   --ring: oklch(0.12 0 0);
 
   /* Charts: tonal grayscale steps, not rainbow */
@@ -89,57 +93,60 @@
   --chart-2: oklch(0.35 0 0);
   --chart-3: oklch(0.55 0 0);
   --chart-4: oklch(0.7 0 0);
-  --chart-5: oklch(0.58 0.22 25);
+  --chart-5: oklch(0.54 0.09 190);
 
-  --radius: 0px;
+  --radius: 12px;
 
-  --sidebar: oklch(1 0 0);
+  --sidebar: oklch(0.975 0 0);
   --sidebar-foreground: oklch(0.12 0 0);
   --sidebar-primary: oklch(0.12 0 0);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.93 0 0);
   --sidebar-accent-foreground: oklch(0.12 0 0);
-  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-border: oklch(0.885 0 0);
   --sidebar-ring: oklch(0.12 0 0);
 }
 
 .dark {
-  --background: oklch(0.08 0 0);
+  color-scheme: dark;
+
+  /* Soft charcoal canvas; separation via fills and spacing, not lines. */
+  --background: oklch(0.215 0 0);
   --foreground: oklch(0.98 0 0);
 
-  --card: oklch(0.08 0 0);
+  --card: oklch(0.215 0 0);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.1 0 0);
+  --popover: oklch(0.29 0 0);
   --popover-foreground: oklch(0.98 0 0);
 
-  --primary: oklch(0.62 0.24 25);
-  --primary-foreground: oklch(0.08 0 0);
+  --primary: oklch(0.65 0.09 190);
+  --primary-foreground: oklch(0.215 0 0);
 
-  --secondary: oklch(0.16 0 0);
+  --secondary: oklch(0.285 0 0);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.14 0 0);
-  --muted-foreground: oklch(0.62 0 0);
-  --accent: oklch(0.16 0 0);
+  --muted: oklch(0.285 0 0);
+  --muted-foreground: oklch(0.7 0 0);
+  --accent: oklch(0.285 0 0);
   --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.62 0.24 25);
+  --destructive: oklch(0.705 0.23 25);
 
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.22 0 0);
+  --border: oklch(0.32 0 0);
+  --input: oklch(0.45 0 0);
   --ring: oklch(0.98 0 0);
 
   --chart-1: oklch(0.98 0 0);
   --chart-2: oklch(0.75 0 0);
   --chart-3: oklch(0.55 0 0);
   --chart-4: oklch(0.35 0 0);
-  --chart-5: oklch(0.62 0.24 25);
+  --chart-5: oklch(0.65 0.09 190);
 
-  --sidebar: oklch(0.08 0 0);
+  --sidebar: oklch(0.19 0 0);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.98 0 0);
-  --sidebar-primary-foreground: oklch(0.08 0 0);
-  --sidebar-accent: oklch(0.16 0 0);
+  --sidebar-primary-foreground: oklch(0.215 0 0);
+  --sidebar-accent: oklch(0.285 0 0);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.22 0 0);
+  --sidebar-border: oklch(0.32 0 0);
   --sidebar-ring: oklch(0.98 0 0);
 }
 
@@ -163,14 +170,23 @@
     letter-spacing: -0.011em;
   }
 
-  /* Typographic hierarchy — mathematical, decisive */
+  /* Typographic hierarchy — mathematical, decisive.
+     Colour is inherited, never forced, so that inverted surfaces
+     (bg-foreground text-background) flip their headings too. */
   h1,
   h2,
   h3,
   h4 {
-    @apply text-foreground;
     font-feature-settings: 'ss01' on;
     letter-spacing: -0.025em;
+  }
+
+  /* Tailwind v4 dropped Preflight's "button, [role=button] { cursor: pointer }"
+     rule that v3 shipped, so controls fall back to the browser default arrow.
+     Restore it once here rather than per-component. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 
   /* Selection — use the accent */
@@ -184,41 +200,44 @@
    TYPOGRAPHIC SCALE — oversized display utilities
    ========================================================================= */
 
-.display-xl {
-  font-size: clamp(3.5rem, 9vw, 9rem);
-  line-height: 0.92;
-  letter-spacing: -0.04em;
-  font-weight: 600;
-}
+/* In @layer components so Tailwind colour utilities can override them. */
+@layer components {
+  .display-xl {
+    font-size: clamp(3.5rem, 9vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
 
-.display-lg {
-  font-size: clamp(2.5rem, 6vw, 5.5rem);
-  line-height: 0.95;
-  letter-spacing: -0.035em;
-  font-weight: 600;
-}
+  .display-lg {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
 
-.display-md {
-  font-size: clamp(1.75rem, 3.5vw, 3rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-weight: 600;
-}
+  .display-md {
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
 
-.eyebrow {
-  font-size: 0.6875rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--muted-foreground);
-}
+  .eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
 
-.mono-label {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
 }
 
 /* =========================================================================
@@ -315,16 +334,14 @@
 }
 
 .prose pre {
-  @apply bg-muted p-4 overflow-x-auto border border-border;
+  @apply bg-muted p-4 overflow-x-auto rounded-xl;
   font-family: var(--font-mono);
   font-size: 0.8125rem;
-  border-radius: 0;
 }
 
 .prose code {
-  @apply bg-muted px-1.5 py-0.5 text-[0.85em];
+  @apply bg-muted px-1.5 py-0.5 text-[0.85em] rounded-md;
   font-family: var(--font-mono);
-  border-radius: 0;
 }
 
 .prose pre code {
@@ -389,7 +406,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: oklch(0.7 0 0 / 40%);
-  border-radius: 0;
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

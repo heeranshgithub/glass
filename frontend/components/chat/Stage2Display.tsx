@@ -44,169 +44,129 @@ export function Stage2Display({
 
   return (
     <section className="space-y-4">
-      <header className="grid grid-cols-[3rem_1fr_auto] gap-4 items-baseline">
-        <span className="mono-label tabular-nums">02</span>
-        <div>
-          <h2 className="display-md leading-none">Rankings</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Models evaluate each other&rsquo;s responses anonymously.
-          </p>
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Rankings</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Models evaluate each other&rsquo;s responses anonymously.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        {rankings.map((rank, index) => {
+          const active = activeTab === index;
+          return (
+            <button
+              key={index}
+              onClick={() => setActiveTab(index)}
+              className={cn(
+                'rounded-full px-3.5 py-1.5 text-sm transition-colors',
+                active
+                  ? 'bg-muted text-foreground font-medium'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+              )}
+            >
+              {rank?.model ? getModelShortName(rank.model) : 'Unknown'}
+            </button>
+          );
+        })}
+      </div>
+
+      <div>
+        <div className="text-xs text-muted-foreground mb-2">
+          Evaluation by {rankings[activeTab]?.model || 'Unknown'}
         </div>
-        <span className="mono-label tabular-nums">
-          {String(rankings.length).padStart(2, '0')} / evaluators
-        </span>
-      </header>
-
-      <div className="swiss-rule" />
-
-      <div className="grid grid-cols-[3rem_1fr] gap-4">
-        <div />
-        <div className="space-y-8">
-          {/* Evaluator tabs */}
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-x-5 gap-y-1">
-              {rankings.map((rank, index) => {
-                const active = activeTab === index;
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setActiveTab(index)}
-                    className={cn(
-                      'group inline-flex items-baseline gap-2 text-sm transition-colors',
-                      active
-                        ? 'text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'font-mono',
-                        active && 'border-b border-primary pb-0.5'
-                      )}
-                    >
-                      {rank?.model ? getModelShortName(rank.model) : 'Unknown'}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div>
-              <div className="mono-label mb-3">
-                Evaluation by {rankings[activeTab]?.model || 'Unknown'}
-              </div>
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown>
-                  {deAnonymizeText(
-                    rankings[activeTab]?.ranking || '',
-                    labelToModel
-                  )}
-                </ReactMarkdown>
-                {isStreaming && (
-                  <span className="inline-block w-1.5 h-4 bg-primary animate-cursor ml-1 align-text-bottom" />
-                )}
-              </div>
-
-              {rankings[activeTab]?.parsedRanking &&
-                rankings[activeTab].parsedRanking.length > 0 && (
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <div className="mono-label mb-3">Extracted ranking</div>
-                    <ol className="space-y-1">
-                      {rankings[activeTab]?.parsedRanking?.map((label, i) => (
-                        <li
-                          key={i}
-                          className="flex items-baseline gap-4 text-sm"
-                        >
-                          <span className="mono-label tabular-nums w-8 shrink-0">
-                            {String(i + 1).padStart(2, '0')}
-                          </span>
-                          <span
-                            className={cn(
-                              'font-mono',
-                              i === 0 && 'font-semibold text-foreground'
-                            )}
-                          >
-                            {labelToModel && labelToModel[label]
-                              ? getModelShortName(labelToModel[label])
-                              : label}
-                          </span>
-                          {i === 0 && (
-                            <span className="h-1 w-1 bg-primary self-center" />
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
-            </div>
-          </div>
-
-          {/* Aggregate */}
-          {aggregateRanking && aggregateRanking.length > 0 && (
-            <div>
-              <div className="flex items-baseline justify-between mb-3">
-                <h3 className="text-sm font-semibold">Aggregate ranking</h3>
-                <span className="mono-label">
-                  Combined across all evaluators
-                </span>
-              </div>
-              <div className="swiss-rule mb-3" />
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left">
-                    <th className="mono-label font-normal py-1 pr-4 w-10">#</th>
-                    <th className="mono-label font-normal py-1 pr-4">Model</th>
-                    <th className="mono-label font-normal py-1 pr-4 text-right tabular-nums">
-                      Score
-                    </th>
-                    <th className="mono-label font-normal py-1 pr-4 text-right tabular-nums">
-                      Avg
-                    </th>
-                    <th className="mono-label font-normal py-1 text-right tabular-nums">
-                      Votes
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aggregateRanking.map((agg, index) => (
-                    <tr
-                      key={index}
-                      className={cn(
-                        'border-t border-border',
-                        index === 0 && 'font-semibold'
-                      )}
-                    >
-                      <td className="py-2.5 pr-4 tabular-nums">
-                        {index === 0 ? (
-                          <span className="text-primary">
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                        ) : (
-                          String(index + 1).padStart(2, '0')
-                        )}
-                      </td>
-                      <td className="py-2.5 pr-4 font-mono">
-                        {agg?.model ? getModelShortName(agg.model) : 'Unknown'}
-                      </td>
-                      <td className="py-2.5 pr-4 text-right tabular-nums">
-                        {agg?.score != null ? agg.score.toFixed(1) : '—'}
-                      </td>
-                      <td className="py-2.5 pr-4 text-right tabular-nums text-muted-foreground">
-                        {agg?.averageRank != null
-                          ? agg.averageRank.toFixed(2)
-                          : '—'}
-                      </td>
-                      <td className="py-2.5 text-right tabular-nums text-muted-foreground">
-                        {agg?.rankingsCount ?? 0}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <ReactMarkdown>
+            {deAnonymizeText(rankings[activeTab]?.ranking || '', labelToModel)}
+          </ReactMarkdown>
+          {isStreaming && (
+            <span className="inline-block w-1.5 h-4 bg-primary animate-cursor ml-1 align-text-bottom" />
           )}
         </div>
+
+        {rankings[activeTab]?.parsedRanking &&
+          rankings[activeTab].parsedRanking.length > 0 && (
+            <div className="mt-6 rounded-2xl bg-muted/50 p-4">
+              <div className="text-xs text-muted-foreground mb-2.5">
+                Extracted ranking
+              </div>
+              <ol className="space-y-1.5">
+                {rankings[activeTab]?.parsedRanking?.map((label, i) => (
+                  <li key={i} className="flex items-baseline gap-3 text-sm">
+                    <span className="tabular-nums w-5 shrink-0 text-muted-foreground">
+                      {i + 1}
+                    </span>
+                    <span className={cn(i === 0 && 'font-semibold')}>
+                      {labelToModel && labelToModel[label]
+                        ? getModelShortName(labelToModel[label])
+                        : label}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
       </div>
+
+      {aggregateRanking && aggregateRanking.length > 0 && (
+        <div className="pt-2">
+          <div className="flex items-baseline justify-between mb-2.5">
+            <h3 className="text-sm font-semibold">Aggregate ranking</h3>
+            <span className="text-xs text-muted-foreground">
+              Combined across all evaluators
+            </span>
+          </div>
+          <div className="overflow-x-auto rounded-2xl bg-muted/50">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-muted-foreground">
+                  <th className="font-normal py-2.5 pl-4 pr-4 w-10">#</th>
+                  <th className="font-normal py-2.5 pr-4">Model</th>
+                  <th className="font-normal py-2.5 pr-4 text-right tabular-nums">
+                    Score
+                  </th>
+                  <th className="font-normal py-2.5 pr-4 text-right tabular-nums">
+                    Avg
+                  </th>
+                  <th className="font-normal py-2.5 pr-4 text-right tabular-nums">
+                    Votes
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {aggregateRanking.map((agg, index) => (
+                  <tr
+                    key={index}
+                    className={cn(index === 0 && 'font-semibold')}
+                  >
+                    <td className="py-2.5 pl-4 pr-4 tabular-nums">
+                      {index === 0 ? (
+                        <span className="text-primary">{index + 1}</span>
+                      ) : (
+                        index + 1
+                      )}
+                    </td>
+                    <td className="py-2.5 pr-4">
+                      {agg?.model ? getModelShortName(agg.model) : 'Unknown'}
+                    </td>
+                    <td className="py-2.5 pr-4 text-right tabular-nums">
+                      {agg?.score != null ? agg.score.toFixed(1) : '—'}
+                    </td>
+                    <td className="py-2.5 pr-4 text-right tabular-nums text-muted-foreground">
+                      {agg?.averageRank != null
+                        ? agg.averageRank.toFixed(2)
+                        : '—'}
+                    </td>
+                    <td className="py-2.5 pr-4 text-right tabular-nums text-muted-foreground">
+                      {agg?.rankingsCount ?? 0}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

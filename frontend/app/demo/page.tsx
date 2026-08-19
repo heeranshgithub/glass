@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { useDemoLoginMutation } from '@/lib/store/api/authApi';
 import { useAppDispatch } from '@/lib/store';
 import { setTokens } from '@/lib/store/slices/authSlice';
@@ -33,18 +34,16 @@ export default function DemoPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
-        <div className="max-w-sm w-full space-y-6">
-          <span className="mono-label">Glass / Demo</span>
-          <div className="swiss-rule-strong" />
-          <h1 className="display-md leading-none">
-            Demo login
-            <br />
-            failed<span className="text-primary">.</span>
+        <div className="max-w-sm w-full space-y-5">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Demo login failed
           </h1>
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
+            {error}
+          </p>
           <button
             onClick={() => router.push('/login')}
-            className="h-10 px-4 bg-foreground text-background text-sm font-medium hover:bg-primary transition-colors"
+            className="h-10 px-5 rounded-full bg-foreground text-background text-sm font-medium hover:bg-foreground/85 transition-colors"
           >
             Go to login
           </button>
@@ -55,11 +54,9 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex flex-col items-start gap-2">
-        <span className="mono-label">Glass / Demo</span>
-        <span className="display-md">
-          Signing in<span className="animate-cursor text-primary">_</span>
-        </span>
+      <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Signing in to the demo</span>
       </div>
     </div>
   );

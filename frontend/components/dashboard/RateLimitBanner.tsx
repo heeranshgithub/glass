@@ -23,19 +23,19 @@ export function RateLimitBanner({ user }: RateLimitBannerProps) {
   return (
     <div
       className={cn(
-        'w-full border-b text-sm',
+        'w-full text-sm',
         isExhausted
-          ? 'bg-background border-destructive text-destructive'
+          ? 'bg-destructive/10 text-destructive'
           : isLow
-            ? 'bg-background border-foreground text-foreground'
-            : 'bg-background border-border text-foreground'
+            ? 'bg-muted/60 text-foreground'
+            : 'text-muted-foreground'
       )}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span
             className={cn(
-              'mono-label',
+              'text-xs font-semibold',
               isExhausted ? 'text-destructive' : 'text-foreground'
             )}
           >
@@ -43,7 +43,7 @@ export function RateLimitBanner({ user }: RateLimitBannerProps) {
           </span>
           <span
             className={cn(
-              'h-1 w-1',
+              'h-1 w-1 rounded-full',
               isExhausted
                 ? 'bg-destructive'
                 : isLow

@@ -4,6 +4,12 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/lib/store';
 
+const STAGES = [
+  { title: 'Responses', body: 'Every model answers independently.' },
+  { title: 'Rankings', body: 'Peers rank each other, anonymously.' },
+  { title: 'Synthesis', body: 'An arbiter writes the final answer.' },
+];
+
 export default function AuthLayout({
   children,
 }: {
@@ -23,7 +29,7 @@ export default function AuthLayout({
   if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <span className="mono-label">Loading</span>
+        <span className="text-sm text-muted-foreground">Loading…</span>
       </div>
     );
   }
@@ -33,60 +39,51 @@ export default function AuthLayout({
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left — editorial brand panel */}
-      <div className="hidden lg:flex flex-col justify-between bg-foreground text-background p-12 relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -left-20 h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
-          <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-background/10 blur-3xl" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)] [background-size:28px_28px] opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-background/5 to-background/20" />
-        </div>
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden grid lg:grid-cols-2 bg-background">
+      {/* Left — brand panel */}
+      <div className="hidden lg:flex flex-col justify-between bg-sidebar p-12 overflow-y-auto">
+        <button
+          onClick={() => router.push('/')}
+          className="w-fit text-xl font-bold tracking-tighter leading-none"
+        >
+          Glass
+        </button>
 
-        <div className="relative z-10 flex min-h-[2.5rem] items-baseline">
-          <span className="text-2xl font-bold tracking-tighter">Glass</span>
-        </div>
+        <div className="space-y-8 max-w-md">
+          <h1 className="text-5xl font-semibold tracking-tight leading-[1.05]">
+            Multi-model consensus
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Many models respond, peer-rank each other, and an arbiter
+            synthesises a single, well-reasoned answer.
+          </p>
 
-        <div className="relative z-10 space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-background/25 bg-background/10 px-3 py-1 text-xs text-background/85">
-            Multi-agent orchestration
-          </div>
-
-          <div className="space-y-4">
-            <h1 className="display-lg max-w-xl">Multi-model consensus</h1>
-            <p className="text-base text-background/75 max-w-md leading-relaxed">
-              Many models respond, peer-rank each other, and an arbiter
-              synthesises a single, well-reasoned answer.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 pt-4 max-w-md">
-            {[
-              { n: '01', label: 'Responses' },
-              { n: '02', label: 'Rankings' },
-              { n: '03', label: 'Synthesis' },
-            ].map(s => (
+          <div className="space-y-2">
+            {STAGES.map((s, i) => (
               <div
-                key={s.n}
-                className="space-y-1 rounded-xl border border-background/20 bg-background/10 px-4 py-3 backdrop-blur-sm"
+                key={s.title}
+                className="flex items-center gap-4 rounded-2xl bg-muted/60 px-5 py-4"
               >
-                <div className="text-3xl font-semibold tabular-nums leading-none">
-                  {s.n}
+                <span className="text-sm tabular-nums text-muted-foreground">
+                  {i + 1}
+                </span>
+                <div>
+                  <div className="text-sm font-medium">{s.title}</div>
+                  <div className="text-sm text-muted-foreground">{s.body}</div>
                 </div>
-                <div className="mono-label text-background/65">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-10 flex items-baseline justify-between mono-label text-background/55">
+        <div className="flex items-baseline justify-between text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} Glass</span>
-          <span>Production-ready LLM infrastructure</span>
+          <span>An experiment in consensus</span>
         </div>
       </div>
 
       {/* Right — form */}
-      <div className="flex items-center justify-center p-6 lg:p-12 bg-background">
+      <div className="flex items-center justify-center overflow-y-auto p-6 lg:px-12 lg:py-10">
         <div className="w-full max-w-sm">{children}</div>
       </div>
     </div>

@@ -68,12 +68,10 @@ export default function HomePage() {
             <button
               onClick={handleNewConversation}
               disabled={isCreating}
-              className="group relative flex items-center justify-between w-full p-5 border border-border bg-background hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex items-center justify-between w-full p-5 rounded-2xl bg-muted/50 hover:bg-foreground border border-transparent hover:border-foreground hover:bg-foreground hover:text-background transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex flex-col items-start gap-1">
-                <span className="text-xs font-mono uppercase tracking-widest opacity-60">
-                  Begin
-                </span>
+                <span className="text-xs opacity-70">Begin</span>
                 <span className="text-base font-medium">New conversation</span>
               </div>
               <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center bg-transparent group-hover:border-background group-hover:bg-background group-hover:text-foreground transition-all duration-300">
@@ -88,41 +86,35 @@ export default function HomePage() {
         </section>
 
         <div
-          className="swiss-rule mt-12 lg:mt-16 mb-12 animate-fade-up"
+          className="mt-12 lg:mt-16 mb-12"
           style={{ animationDelay: '100ms' }}
         />
 
         {/* Process — three-column editorial */}
         <section
-          className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10 animate-fade-up"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-up"
           style={{ animationDelay: '200ms' }}
         >
           {stages.map((stage, i) => (
-            <article key={stage.n} className="group relative">
-              <div className="absolute top-0 left-0 w-full h-px bg-border group-hover:bg-foreground transition-colors duration-500" />
-              <div className="absolute top-0 left-0 w-0 h-px bg-primary group-hover:w-full transition-all duration-700 ease-out" />
-
-              <div className="pt-6">
-                <div className="flex items-baseline justify-between mb-4">
-                  <span className="text-4xl font-light text-muted-foreground group-hover:text-foreground transition-colors duration-500">
-                    {stage.n}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium tracking-tight mb-2 group-hover:text-primary transition-colors duration-500">
-                    {stage.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {stage.body}
-                  </p>
-                </div>
-              </div>
+            <article
+              key={stage.n}
+              className="rounded-2xl bg-muted/50 p-6 transition-colors hover:bg-muted"
+            >
+              <span className="text-3xl font-light tabular-nums text-muted-foreground">
+                {stage.n}
+              </span>
+              <h3 className="mt-3 text-lg font-semibold tracking-tight">
+                {stage.title}
+              </h3>
+              <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                {stage.body}
+              </p>
             </article>
           ))}
         </section>
 
         <div
-          className="swiss-rule mt-12 lg:mt-16 mb-12 animate-fade-up"
+          className="mt-12 lg:mt-16 mb-12"
           style={{ animationDelay: '300ms' }}
         />
 
@@ -132,14 +124,14 @@ export default function HomePage() {
           style={{ animationDelay: '400ms' }}
         >
           <div className="lg:col-span-3 space-y-4">
-            <h2 className="mono-label">System Status</h2>
+            <h2 className="text-xs text-muted-foreground">System status</h2>
             <div className="flex items-center gap-3">
               <div className="relative flex h-3 w-3">
                 <span
-                  className={`animate-ping absolute inline-flex h-full w-full opacity-50 ${health?.openrouterConfigured ? 'bg-foreground' : 'bg-primary'}`}
+                  className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-50 ${health?.openrouterConfigured || isDemo ? 'bg-primary' : 'bg-destructive'}`}
                 ></span>
                 <span
-                  className={`relative inline-flex h-3 w-3 ${health?.openrouterConfigured ? 'bg-foreground' : 'bg-primary'}`}
+                  className={`relative inline-flex h-3 w-3 rounded-full ${health?.openrouterConfigured || isDemo ? 'bg-primary' : 'bg-destructive'}`}
                 ></span>
               </div>
               <span className="text-sm font-medium">
@@ -155,17 +147,19 @@ export default function HomePage() {
           {health && (
             <>
               <div className="lg:col-span-6 space-y-4">
-                <h2 className="mono-label">Active Council Models</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border">
+                <h2 className="text-xs text-muted-foreground">
+                  Active council models
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {health.councilModels.map((model, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between p-3 bg-background"
+                      className="flex items-center justify-between p-3 rounded-xl bg-muted/50"
                     >
                       <span className="text-sm font-mono truncate mr-4">
                         {model.split('/').pop()}
                       </span>
-                      <span className="mono-label shrink-0 text-muted-foreground">
+                      <span className="text-xs shrink-0 text-muted-foreground">
                         {String.fromCharCode(65 + i)}
                       </span>
                     </div>
@@ -173,8 +167,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="lg:col-span-3 space-y-4">
-                <h2 className="mono-label">Arbiter Model</h2>
-                <div className="p-3 border border-border bg-foreground text-background">
+                <h2 className="text-xs text-muted-foreground">Arbiter model</h2>
+                <div className="p-3 rounded-xl bg-foreground text-background">
                   <span className="text-sm font-mono block truncate">
                     {health.arbiterModel.split('/').pop()}
                   </span>
