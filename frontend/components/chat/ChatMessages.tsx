@@ -31,11 +31,11 @@ const EMPTY_STAGES = [
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   if (messages.length === 0) {
     return (
-      <div className="flex-1 overflow-y-auto">
-        <div className={`${chatColumn} pt-10 pb-8 sm:pt-16`}>
-          <div className="space-y-12">
-            <div className="space-y-4">
-              <h1 className="display-lg max-w-[min(100%,36rem)] leading-[0.98] animate-fade-up">
+      <div className="flex-1 overflow-y-auto flex items-center">
+        <div className={`${chatColumn} py-8`}>
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight max-w-[min(100%,36rem)] leading-[1.05] animate-fade-up">
                 <span className="block">Three stages.</span>
                 <span className="block text-muted-foreground">Many minds.</span>
                 <span className="block">One answer</span>
