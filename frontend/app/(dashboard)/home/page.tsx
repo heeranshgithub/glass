@@ -53,8 +53,10 @@ export default function HomePage() {
           style={{ animationDelay: '0ms' }}
         >
           <div className="lg:col-span-8">
-            <h1 className="display-xl leading-[0.9]">Multi-model consensus</h1>
-            <p className="mt-6 text-lg leading-relaxed text-muted-foreground max-w-2xl font-light">
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+              Multi-model consensus
+            </h1>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground max-w-2xl">
               Harness the collective intelligence of multiple AI models through
               a rigorous three-stage evaluation process.
             </p>
