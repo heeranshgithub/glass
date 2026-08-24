@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppSelector } from '@/lib/store';
+import { useAppDispatch, useAppSelector, toggleMobileNav } from '@/lib/store';
+import { Menu } from 'lucide-react';
 import { useGetCurrentUserQuery } from '@/lib/store/api/userApi';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { OpenRouterKeyModal } from '@/components/modals/OpenRouterKeyModal';
@@ -18,6 +19,7 @@ export default function DashboardLayout({
     state => state.auth
   );
   const sidebarOpen = useAppSelector(state => state.ui.sidebarOpen);
+  const dispatch = useAppDispatch();
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   // Fetch user profile to check for API key
@@ -62,6 +64,21 @@ export default function DashboardLayout({
             sidebarOpen ? 'lg:ml-72' : 'lg:ml-14'
           }`}
         >
+          {/* Mobile header: the drawer needs a permanent way in, and a
+              floating button would sit on top of every page's content. */}
+          <header className="lg:hidden flex items-center gap-1 h-14 shrink-0 px-2">
+            <button
+              onClick={() => dispatch(toggleMobileNav())}
+              aria-label="Open menu"
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <span className="text-lg font-bold tracking-tighter leading-none">
+              Glass
+            </span>
+          </header>
+
           {user && <RateLimitBanner user={user} />}
           {children}
         </main>

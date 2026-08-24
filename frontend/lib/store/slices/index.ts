@@ -8,6 +8,8 @@ export {
 export {
   default as uiReducer,
   toggleSidebar,
+  toggleMobileNav,
+  closeMobileNav,
   setSidebarOpen,
   setTheme,
   initializeUI,

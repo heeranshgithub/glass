@@ -22,13 +22,13 @@ function ModelScoreboardTable({ models }: { models: ModelLeaderboardEntry[] }) {
           <tr className="text-left text-xs text-muted-foreground">
             <th className="font-normal py-3 pl-5 pr-3 w-14">Rank</th>
             <th className="font-normal py-3 pr-3">Model</th>
-            <th className="font-normal py-3 pr-3 text-right tabular-nums">
+            <th className="font-normal py-3 pr-5 sm:pr-3 text-right tabular-nums">
               Avg
             </th>
-            <th className="font-normal py-3 pr-3 text-right tabular-nums">
+            <th className="hidden sm:table-cell font-normal py-3 pr-3 text-right tabular-nums">
               Total
             </th>
-            <th className="font-normal py-3 pr-5 text-right tabular-nums">
+            <th className="hidden sm:table-cell font-normal py-3 pr-5 text-right tabular-nums">
               Appearances
             </th>
           </tr>
@@ -45,14 +45,16 @@ function ModelScoreboardTable({ models }: { models: ModelLeaderboardEntry[] }) {
               <td className="py-3 pl-5 pr-3 tabular-nums text-muted-foreground">
                 {model.rank}
               </td>
-              <td className="py-3 pr-3 font-mono">{model.model}</td>
-              <td className="py-3 pr-3 text-right tabular-nums">
+              <td className="py-3 pr-3 font-mono break-all sm:break-normal">
+                {model.model}
+              </td>
+              <td className="py-3 pr-5 sm:pr-3 text-right tabular-nums">
                 {model.avgScore.toFixed(2)}
               </td>
-              <td className="py-3 pr-3 text-right tabular-nums text-muted-foreground">
+              <td className="hidden sm:table-cell py-3 pr-3 text-right tabular-nums text-muted-foreground">
                 {model.totalScore.toFixed(1)}
               </td>
-              <td className="py-3 pr-5 text-right tabular-nums text-muted-foreground">
+              <td className="hidden sm:table-cell py-3 pr-5 text-right tabular-nums text-muted-foreground">
                 {model.appearances}
               </td>
             </tr>
@@ -125,7 +127,7 @@ export default function LeaderboardPage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'rounded-full px-3.5 py-1.5 text-sm transition-colors capitalize',
+                  'rounded-full px-4 py-2.5 lg:px-3.5 lg:py-1.5 text-sm transition-colors capitalize',
                   active
                     ? 'bg-muted text-foreground font-medium'
                     : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'

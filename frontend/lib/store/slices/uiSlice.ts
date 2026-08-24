@@ -1,13 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UIState {
+  /** Desktop only: rail expanded (w-72) vs collapsed (w-14). */
   sidebarOpen: boolean;
+  /** Mobile only: the off-canvas drawer. Always starts closed. */
+  mobileNavOpen: boolean;
   theme: 'light' | 'dark' | 'system';
   currentConversationId: string | null;
 }
 
 const initialState: UIState = {
   sidebarOpen: true,
+  mobileNavOpen: false,
   theme: 'system',
   currentConversationId: null,
 };
@@ -18,6 +22,12 @@ const uiSlice = createSlice({
   reducers: {
     toggleSidebar: state => {
       state.sidebarOpen = !state.sidebarOpen;
+    },
+    toggleMobileNav: state => {
+      state.mobileNavOpen = !state.mobileNavOpen;
+    },
+    closeMobileNav: state => {
+      state.mobileNavOpen = false;
     },
     setSidebarOpen: (state, action: PayloadAction<boolean>) => {
       state.sidebarOpen = action.payload;
@@ -48,6 +58,8 @@ const uiSlice = createSlice({
 
 export const {
   toggleSidebar,
+  toggleMobileNav,
+  closeMobileNav,
   setSidebarOpen,
   setTheme,
   initializeUI,
