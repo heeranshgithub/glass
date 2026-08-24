@@ -21,7 +21,7 @@ export default function RootPage() {
   }, [isAuthenticated, isInitialized, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-dvh flex items-center justify-center bg-background">
       <span className="text-sm text-muted-foreground">Loading…</span>
     </div>
   );

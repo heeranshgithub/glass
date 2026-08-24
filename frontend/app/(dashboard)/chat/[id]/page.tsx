@@ -393,7 +393,11 @@ export default function ChatPage() {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-      <ChatMessages messages={messages} isLoading={isStreaming} />
+      <ChatMessages
+        messages={messages}
+        isLoading={isStreaming}
+        conversationId={conversationId}
+      />
       {rateLimitError && (
         <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-1">
           <div className="rounded-2xl bg-destructive/10 px-4 py-3 flex items-start gap-2 text-sm">

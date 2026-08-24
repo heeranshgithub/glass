@@ -45,7 +45,7 @@ export default function DashboardLayout({
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
         <span className="text-sm text-muted-foreground">Loading…</span>
       </div>
     );
@@ -57,7 +57,7 @@ export default function DashboardLayout({
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-dvh overflow-hidden bg-background">
         <Sidebar />
         <main
           className={`relative flex-1 flex flex-col overflow-hidden transition-[margin] duration-200 ${
@@ -66,7 +66,7 @@ export default function DashboardLayout({
         >
           {/* Mobile header: the drawer needs a permanent way in, and a
               floating button would sit on top of every page's content. */}
-          <header className="lg:hidden flex items-center gap-1 h-14 shrink-0 px-2">
+          <header className="lg:hidden flex items-center gap-1 min-h-14 shrink-0 px-2 pt-[env(safe-area-inset-top)]">
             <button
               onClick={() => dispatch(toggleMobileNav())}
               aria-label="Open menu"

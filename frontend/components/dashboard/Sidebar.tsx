@@ -166,7 +166,8 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full flex flex-col bg-sidebar transition-[width,transform] duration-200 ease-out',
+          'fixed top-0 left-0 z-50 h-dvh flex flex-col bg-sidebar transition-[width,transform] duration-200 ease-out',
+          'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]',
           // Mobile: full-height drawer, off-canvas until opened.
           'w-[min(19rem,85vw)]',
           mobileNavOpen ? 'translate-x-0' : '-translate-x-full',

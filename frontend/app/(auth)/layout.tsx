@@ -28,7 +28,7 @@ export default function AuthLayout({
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-dvh flex items-center justify-center bg-background">
         <span className="text-sm text-muted-foreground">Loading…</span>
       </div>
     );
@@ -39,7 +39,7 @@ export default function AuthLayout({
   }
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden grid lg:grid-cols-2 bg-background">
+    <div className="min-h-dvh lg:h-dvh lg:overflow-hidden grid lg:grid-cols-2 bg-background">
       {/* Left — brand panel */}
       <div className="hidden lg:flex flex-col justify-between bg-sidebar p-12 overflow-y-auto">
         <button

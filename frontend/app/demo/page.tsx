@@ -33,7 +33,7 @@ export default function DemoPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+      <div className="min-h-dvh flex items-center justify-center bg-background px-6">
         <div className="max-w-sm w-full space-y-5">
           <h1 className="text-3xl font-semibold tracking-tight">
             Demo login failed
@@ -53,7 +53,7 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-dvh flex items-center justify-center bg-background">
       <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         <span>Signing in to the demo</span>
